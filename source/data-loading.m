@@ -34,10 +34,10 @@ for subject = 1:9
 
         if (c_ele == 769 || c_ele == 770) && header.ArtifactSelection(k)==0 %Check not defined artifact and check the label
 
-%             s = signal(c_pos:(c_pos+c_dur-1),1:22); %Extract the signal of interest
-%               
-%             path = folder+"S"+subject+"_"+k+".mat"; %Save the signal
-%             save(path, 's');
+            s = signal(c_pos:(c_pos+c_dur-1),1:22); %Extract the signal of interest
+
+            path = folder+"S"+subject+"_"+k+".mat"; %Save the signal
+            save(path, 's');
             if c_ele == 769, label = 0;
             else, label = 1;
             end
