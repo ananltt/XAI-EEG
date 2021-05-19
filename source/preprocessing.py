@@ -1,5 +1,6 @@
 import pandas as pd
 from scipy.io import loadmat
+from EEGModels import EEGNet
 
 
 def load_data(reference, index, folder):
@@ -25,4 +26,3 @@ reference = pd.read_csv(data_file, index_col=None, header=0)
 
 index = 0
 data = load_data(reference, index, data_dir)
-

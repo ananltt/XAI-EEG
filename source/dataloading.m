@@ -7,10 +7,11 @@ clc
 %% Load EEG, extract interesting segments and save them as mat
 
 reference = [];
-folder = "dataset/EEG/";
+folder = "../dataset/EEG/";
 
+found = false;
 for subject = 1:9
-    path = convertStringsToChars("dataset/A0"+subject+"T.gdf");
+    path = convertStringsToChars("../dataset/A0"+subject+"T.gdf");
     [signal, header] = sload(path);
 
     DUR = 7.5;      %Segment duration
@@ -21,7 +22,7 @@ for subject = 1:9
 
     k = 1;
 
-    for i = 1:length(sigElements(:,1))-1
+    for i = 1:(length(sigElements(:,1))-1)
 
         c_pos = sigElements(:,1); %Current initial position
         c_pos = c_pos(i);
@@ -38,6 +39,7 @@ for subject = 1:9
 
             path = folder+"S"+subject+"_"+k+".mat"; %Save the signal
             save(path, 's');
+            
             if c_ele == 769, label = 0;
             else, label = 1;
             end
@@ -46,10 +48,33 @@ for subject = 1:9
             reference(end+1, :) = current;
             
             k = k+1;
-
+            
+            if found == false
+                figure
+                plot(1:1875, s(:,1), 'k', 'LineWidth', 1)
+                grid on;
+                xlabel('Samples')
+                ylabel('EEG signal [ \mu V]')
+                title('EEG signal')
+                
+                Fcut1BPF = 1.5;
+                Fcut2BPF = 80;
+                HdBPF = BandPassFilter(fs, Fcut1BPF, Fcut2BPF);
+                s_filt = filtfilthd(HdBPF, s(:,1));
+                
+                figure
+                plot(1:1875, s_filt, 'k', 'LineWidth', 1)
+                grid on;
+                xlabel('Samples')
+                ylabel('EEG signal [ \mu V]')
+                title('EEG signal')
+                found=true;
+            end
         end
+
     end
 end
 
+            
 path = folder + "reference.csv";
 writematrix(reference, path);
