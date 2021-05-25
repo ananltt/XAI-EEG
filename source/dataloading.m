@@ -33,42 +33,36 @@ for subject = 1:9
         c_ele = sigElements(:,3); %Current segment type (i+1???)
         c_ele = c_ele(i+1);
 
-        if (c_ele == 769 || c_ele == 770) && header.ArtifactSelection(k)==0 %Check not defined artifact and check the label
-
-            s = signal(c_pos:(c_pos+c_dur-1),1:22); %Extract the signal of interest
-
+        if (c_ele == 769 || c_ele == 770) 
+            
+            begin = c_pos + 500;
+            end_ = begin + 1000 - 1;
+            s = (signal(begin:end_, 1:22))'; %Extract the signal of interest
+            
+            for i=1:size(s, 1)
+                s(i,:) = normalize(s(i,:));
+                s(i,:) = rescale(s(i,:));
+            end
+            
             path = folder+"S"+subject+"_"+k+".mat"; %Save the signal
             save(path, 's');
             
-            if c_ele == 769, label = 0;
-            else, label = 1;
-            end
+            if c_ele == 769, label = [1, 0]; end
+            if c_ele == 770, label = [0, 1]; end
             
             current = [subject, k, label];
             reference(end+1, :) = current;
             
-            k = k+1;
+            k = k+1; 
             
             if found == false
                 figure
-                plot(1:1875, s(:,1), 'k', 'LineWidth', 1)
+                plot(1:1000, s(1,:), 'k', 'LineWidth', 1)
                 grid on;
                 xlabel('Samples')
                 ylabel('EEG signal [ \mu V]')
                 title('EEG signal')
-                
-                Fcut1BPF = 1.5;
-                Fcut2BPF = 80;
-                HdBPF = BandPassFilter(fs, Fcut1BPF, Fcut2BPF);
-                s_filt = filtfilthd(HdBPF, s(:,1));
-                
-                figure
-                plot(1:1875, s_filt, 'k', 'LineWidth', 1)
-                grid on;
-                xlabel('Samples')
-                ylabel('EEG signal [ \mu V]')
-                title('EEG signal')
-                found=true;
+                found = true;
             end
         end
 

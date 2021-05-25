@@ -1,28 +1,21 @@
-import pandas as pd
-from scipy.io import loadmat
 from EEGModels import EEGNet
+from functions import *
+import numpy as np
 
+train_dataset, train_labels = load_dataset(train_ref, data_dir)
+val_dataset, val_labels = load_dataset(val_ref, data_dir)
+test_dataset, test_labels = load_dataset(test_ref, data_dir)
+input_shape = (22, 1000, 1)
 
-def load_data(reference, index, folder):
-    part_id = int(reference.iloc[index][0])
-    trial_id = int(reference.iloc[index][1])
-    label = str(reference.iloc[index][2])
+print("CNN")
+model = CNN(input_shape)
+model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.00001),
+              loss="mse",
+              metrics=["accuracy"])
+print(model.predict(test_dataset))
+history = model.fit(train_dataset, train_labels, batch_size, num_epochs)
+print(test_labels)
 
-    if isinstance(folder, bytes):
-        folder = folder.decode()
-    if isinstance(part_id, bytes):
-        part_id = part_id.decode()
-
-    file_name = str(folder + 'S' + str(part_id) + '_' + str(trial_id) + '.mat')
-    signal = loadmat(file_name)['s']
-    signal.reshape(-1, 22)
-
-    return signal
-
-
-data_dir = 'dataset/EEG/'
-data_file = data_dir + 'reference.csv'
-reference = pd.read_csv(data_file, index_col=None, header=0)
-
-index = 0
-data = load_data(reference, index, data_dir)
+# model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1], kernLength=4)
+# model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.Adam(0.0001), metrics=['accuracy'])
+# history = model.fit(train_dataset, train_labels, batch_size, num_epochs)
