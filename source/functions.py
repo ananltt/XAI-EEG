@@ -1,43 +1,8 @@
-from math import sqrt
-import tensorflow as tf
-from numpy.ma import count
 from scipy.io import loadmat
-import os
 import numpy as np
-from sklearn.preprocessing import scale
-from reference import *
-
-
-def DNN(shape):
-    X_input = tf.keras.Input(shape)
-
-    X = tf.keras.layers.Flatten()(X_input)
-    X = tf.keras.layers.Dense(2, activation='softmax')(X)
-
-    model_keras = tf.keras.Model(inputs=X_input, outputs=X)
-
-    return model_keras
-
-def CNN(input_shape):
-
-    X_input = tf.keras.Input(input_shape)
-
-    X = tf.keras.layers.Conv2D(filters=16, kernel_size=3, strides=1, padding='same', name='conv0')(X_input)
-    # X = tf.keras.layers.BatchNormalization(axis=-1, name='bn0')(X)
-    X = tf.keras.layers.Activation('linear')(X)
-    X = tf.keras.layers.Dropout(rate=0.9)(X)
-
-    X = tf.keras.layers.MaxPool2D(pool_size=4)(X)
-
-    X = tf.keras.layers.Flatten()(X)
-    X = tf.keras.layers.Dense(2, activation='softmax', name='fc')(X)
-    model = tf.keras.Model(inputs=X_input, outputs=X)
-
-    return model
 
 
 def load_dataset(ref, data_dir):
-
     dataset = []
     labels = []
 
@@ -57,7 +22,13 @@ def load_dataset(ref, data_dir):
         file_dat = str(data_dir + '/' + str(file_name) + '.mat')
         data = loadmat(file_dat)['s']
 
+        np.nan_to_num(data, False, 0)  ## IMPORTANTE!!!
         dataset.append(data)
         labels.append([left_label, right_label])
+
+        # for j in range(data.shape[0]):
+        #     for k in range(data.shape[1]):
+        #         if math.isnan(data[j, k]):
+        #             print("Trovato - data {} {} {}".format(file_name, j, k))
 
     return np.array(dataset), np.array(labels)
