@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from scipy.io import loadmat
 import numpy as np
 from numpy.fft import rfft
@@ -44,8 +45,9 @@ def extract_FFT(matrix):
         fft_trial = np.empty((trial.shape[0], 501))
 
         for i in range(trial.shape[0]):
-            fft_trial[i, :] = rfft(trial[i, :])
-        # print(fft_trial.shape)
+            data = fft_trial[i, :]
+            fft_trial[i, :] = np.abs(np.fft.fft(data))**2
+
         fft_mat.append(fft_trial)
 
     return np.array(fft_mat)
@@ -60,3 +62,80 @@ def extract_wt(matrix):
             approx.append(np.concatenate((cA, cD)))
         approx_trials.append(approx)
     return np.array(approx_trials)
+
+
+def plot_model_training(history):
+    # accuracy
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('images/model_accuracy.png')
+    plt.close()
+
+    # loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('images/model_loss.png')
+    plt.close()
+
+
+def ablation_zero_segments(dataset, labels, model, accuracy, fs=250):
+
+    differences = np.empty(4)
+    data = dataset
+
+    for k in range(4):
+
+        start = k * fs
+        end = (k + 1) * fs
+
+        data[:, :, start:end] = np.zeros((52, 22, 250))
+        results = model.evaluate(data, labels)
+        differences[k] = accuracy - results[1]
+
+    return differences
+
+
+def ablation_linear_segments(dataset, labels, model, accuracy, fs=250):
+
+    differences = np.empty(4)
+    data = dataset
+
+    for k in range(4):
+
+        start = k * fs
+        end = (k + 1) * fs
+
+        for j in range(data.shape[0]):
+            for i in range(data.shape[1]):
+                prev = data[j, i, start-1]
+                cons = data[j, i, end-1]
+                lin = np.linspace(prev, cons, num=250)
+                data[j, i, start:end] = lin
+
+        results = model.evaluate(data, labels)
+        differences[k] = accuracy - results[1]
+
+    return differences
+
+
+def ablation_zero_channels(dataset, labels, model, accuracy):
+
+    differences = np.empty(22)
+    data = dataset
+
+    for k in range(22):
+
+        data[:, k, :] = np.zeros((52, 1000))
+        results = model.evaluate(data, labels)
+        differences[k] = accuracy - results[1]
+
+    return differences
+

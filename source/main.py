@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 
 if __name__ == "__main__":
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     # Common hyperparameters for the training
 
     batch_size = 16
-    num_epochs = 30
+    num_epochs = 40
 
     # From the reference, create the datasets
 
@@ -75,28 +76,30 @@ if __name__ == "__main__":
 
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-    history = model.fit(x=train_wt, y=train_labels, batch_size=batch_size, epochs=num_epochs,
-                        validation_data=(val_wt, val_labels))
+    history = model.fit(x=train_dataset, y=train_labels, batch_size=batch_size, epochs=num_epochs,
+                        validation_data=(val_dataset, val_labels))
+    plot_model_training(history)
+    model.save('model_dataset.h5')
 
-    results = model.evaluate(test_wt, test_labels)
+    # model = tf.keras.models.load_model('model.h5')
+
+    results = model.evaluate(test_dataset, test_labels)
     print("\nTest loss, Test accuracy: ", results)
 
-    # accuracy
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('images/model_accuracy.png')
-    plt.close()
+    differences = ablation_zero_segments(test_dataset, test_labels, model, results[1])
+    print("\nAblation with zeros in the segments: ", differences)
 
-    # loss
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('images/model_loss.png')
-    plt.close()
+    differences = ablation_linear_segments(test_dataset, test_labels, model, results[1])
+    print("\nAblation with linearity in the segments: ", differences)
+
+    differences = ablation_zero_channels(test_dataset, test_labels, model, results[1])
+    print("\nAblation with zeros in the channels: ", differences)
+
+    # model_wt = tf.keras.models.load_model('model_wt.h5')
+    #
+    # differences = ablation_zero_segments(test_wt, test_labels, model_wt, results[1])
+    # print("\nAblation with zeros in the wavelet decomposition: ", differences)
+    #
+    # differences = ablation_linear_segments(test_wt, test_labels, model_wt, results[1])
+    # print("\nAblation with linearity in the wavelet decomposition: ", differences)
+
