@@ -2,7 +2,8 @@
 """
 File containing various support function.
 
-@author: Alberto Zancanaro (Jesus)
+@author: Anna Nalotto
+@credits: Alberto Zancanaro(jesus-333)
 @organization: University of Padua (Italy)
 """
 
