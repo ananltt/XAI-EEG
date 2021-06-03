@@ -86,17 +86,19 @@ def plot_model_training(history):
     plt.close()
 
 
-def ablation_zero_segments(dataset, labels, model, accuracy, fs=250):
+def ablation_zero_segments(dataset, labels, model, accuracy, fs=250):  # dataset: ntrial * nchannel * nsample
 
     differences = np.empty(4)
-    data = dataset
 
     for k in range(4):
+
+        data = dataset
 
         start = k * fs
         end = (k + 1) * fs
 
-        data[:, :, start:end] = np.zeros((52, 22, 250))
+        data[:, :, start:end] = np.zeros((52, 22, end-start))
+
         results = model.evaluate(data, labels)
         differences[k] = accuracy - results[1]
 
@@ -106,9 +108,10 @@ def ablation_zero_segments(dataset, labels, model, accuracy, fs=250):
 def ablation_linear_segments(dataset, labels, model, accuracy, fs=250):
 
     differences = np.empty(4)
-    data = dataset
 
     for k in range(4):
+
+        data = dataset
 
         start = k * fs
         end = (k + 1) * fs
@@ -129,9 +132,10 @@ def ablation_linear_segments(dataset, labels, model, accuracy, fs=250):
 def ablation_zero_channels(dataset, labels, model, accuracy):
 
     differences = np.empty(22)
-    data = dataset
 
     for k in range(22):
+
+        data = dataset
 
         data[:, k, :] = np.zeros((52, 1000))
         results = model.evaluate(data, labels)

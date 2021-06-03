@@ -15,7 +15,7 @@ if __name__ == "__main__":
     reference = pd.read_csv(data_file, index_col=None, header=0)
     reference.columns = ['subject', 'trial', 'left_label', 'right_label']
 
-    dataset, labels = load_dataset(reference, data_dir)
+    dataset, labels = load_dataset(reference, data_dir) # dataset: n.trials x n.channels x n.samples
 
     classes = []
     for label in labels:
@@ -32,10 +32,10 @@ if __name__ == "__main__":
             values1.append(dataset[i])
 
     dict = {'0': np.stack(values0), '1': np.stack(values1)}
-    # extractor = FBCSP_V4(dict, fs=250, freqs_band=np.linspace(4, 80, 10))
-    # # data_matrix, label = extractor.createDataMatrix()
-    # features1 = extractor.extractFeatures(dataset) # metodo giusto?
-    # print(features1.shape) # (1295, 8)-->per ciascun trial prende 8 features, ma così non riusciamo con EEGNet
+    extractor = FBCSP_V4(dict, fs=250, freqs_band=np.linspace(4, 80, 10))
+    # data_matrix, label = extractor.createDataMatrix()
+    features1 = extractor.extractFeaturesForTraining() # metodo giusto?
+    print(features1[0].shape) # (1295, 8)-->per ciascun trial prende 8 features, ma così non riusciamo con EEGNet
 
     # USE OF EEGNET WITHOUT FEATURES!!!!
 
