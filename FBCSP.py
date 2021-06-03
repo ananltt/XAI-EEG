@@ -16,7 +16,7 @@ import scipy.linalg as la
 from sklearn.feature_selection import mutual_info_classif as MIBIF
 
 #%%
-
+#•RIMUOVERE CLASSIFIER DA COSTRUTTORE
 class FBCSP():
     
     def __init__(self, data_dict, fs, n_w = 2, n_features = 4, freqs_band = None, filter_order = 3, classifier = None, print_var = True):
@@ -55,10 +55,7 @@ class FBCSP():
         self.features_band_list = []
         self.spatialFilteringAndFeatureExtraction()
         
-        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        # Training of the classifier
-        if(classifier != None): self.trainClassifier(classifier = classifier)
-        else: self.trainClassifier() 
+      
         
         
     def filterBankFunction(self, filter_order = 3):
