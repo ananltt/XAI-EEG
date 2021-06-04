@@ -6,14 +6,13 @@ clc
 
 %%
 
-file_name = '../dataset/A01E.gdf';
 dataset_folder_name = '../dataset/EEG';
 mkdir([dataset_folder_name]);
 
 %%
 for i = 1:9
     
-    file_name = convertStringsToChars("../dataset/A0"+i+"E.gdf");
+    file_name = convertStringsToChars("../dataset/A0"+i+"T.gdf");
     
     [s,h] = sload(file_name);
     
@@ -59,6 +58,7 @@ for i = 1:9
     save(strcat(dataset_folder_name, '/S' + string(i) + '_label.mat'), 'event_matrix')
 
 end
+
 
 % clear all
 % close all
