@@ -1,7 +1,5 @@
+from scipy import signal
 from sklearn.preprocessing import normalize
-
-from EEGModels import EEGNet
-from matplotlib import pyplot as plt
 from scipy.io import loadmat
 import numpy as np
 from numpy.fft import rfft
@@ -72,20 +70,37 @@ def create_dict(dataset, classes, labels_name):
     return dict
 
 
-def extract_FFT(matrix):
-    fft_mat = []
+def extract_indexes_segments(data_length, n_segments):
 
-    for trial in matrix:
+    segment_length = int(data_length / n_segments)
+    indexes = []
+
+    for k in range(n_segments):
+
+        start = k * segment_length
+        end = (k + 1) * segment_length
+
+        if (k + 2) * segment_length > data_length:
+            end = data_length
+
+        indexes.append((start, end))
+
+    return indexes
+
+
+def extract_FFT(matrix, fs=250):
+    fft_dataset = np.zeros((matrix.shape[0], matrix.shape[1], 501))
+
+    for t, trial in enumerate(matrix):
+
         trial = np.matrix(trial)
-        fft_trial = np.empty((trial.shape[0], 501))
 
         for i in range(trial.shape[0]):
-            data = fft_trial[i, :]
-            fft_trial[i, :] = np.abs(np.fft.fft(data)) ** 2
+            data = trial[i, :]
+            freqs, psd = signal.periodogram(data, fs=fs)
+            fft_dataset[t, i, :] = psd
 
-        fft_mat.append(fft_trial)
-
-    return np.array(fft_mat)
+    return np.array(fft_dataset)
 
 
 def extract_wt(matrix):

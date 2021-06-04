@@ -2,6 +2,7 @@ import copy
 import numpy as np
 from EEGModels import EEGNet
 from matplotlib import pyplot as plt
+from functions_dataset import extract_indexes_segments
 
 
 def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_name):
@@ -56,17 +57,13 @@ def ablation(dataset, labels, model, total_accuracy, n_segments=4, n_channels=22
 def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # n.trial * n.channel * n.sample
 
     differences = np.empty(n_segments)
-    length = int(dataset.shape[2] / n_segments)
+    indexes = extract_indexes_segments(dataset.shape[2], n_segments)
 
     for k in range(n_segments):
+
         data = copy.deepcopy(dataset)
-
-        start = k * length
-        end = (k + 1) * length
-
-        if (k + 2) * length > data.shape[2]:
-            end = data.shape[2]
-
+        start, end = indexes[k]
+        print(start, end)
         data[:, :, start:end] = np.zeros((data.shape[0], data.shape[1], end - start))
 
         results = model.evaluate(data, labels, verbose=0)
@@ -78,17 +75,12 @@ def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # n
 def ablation_linear_segments(dataset, labels, model, accuracy, n_segments=4):
 
     differences = np.empty(n_segments)
-    length = int(dataset.shape[2] / n_segments)
+    indexes = extract_indexes_segments(dataset.shape[2], n_segments)
 
     for k in range(n_segments):
 
         data = copy.deepcopy(dataset)
-
-        start = k * length
-        end = (k + 1) * length
-
-        if (k + 2) * length > data.shape[2]:
-            end = data.shape[2]
+        start, end = indexes[k]
 
         for j in range(data.shape[0]):
             for i in range(data.shape[1]):

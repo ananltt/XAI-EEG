@@ -9,6 +9,11 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
+    # TODO: nell'ablation considerare il caso di feature extraction
+    # TODO: sistemare FBCSP e capire come funziona
+    # TODO: implementare permutation per XAI
+    # TODO: implementare saliency map
+
     data_dir = 'dataset/EEG'
     n_segments = 4
 
@@ -23,25 +28,23 @@ if __name__ == "__main__":
         if dataset is None:
 
             dataset, classes = load_dataset(data_dir, subjects[0])
+
             trials_dict = create_dict(dataset, classes, labels_name)
             FBCSP_f = FBCSP(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
             dataset_features, classes_features = FBCSP_f.createDataMatrix()
 
         else:
 
-            # TODO: considerare di dividere i 4 secondi in segmenti di 1s
             d, c = load_dataset(data_dir, subject)
-            trials_dict = create_dict(d, c, labels_name)
+            dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
+            classes = np.concatenate((classes, np.array(c)), axis=0)  # Labels {1, 2}
 
+            trials_dict = create_dict(d, c, labels_name)
             FBCSP_f = FBCSP(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
             features, feat_label = FBCSP_f.createDataMatrix()
-            dataset = np.concatenate((dataset, np.array(d)), axis=0)  # Dataset completo
-            classes = np.concatenate((classes, np.array(c)), axis=0)  # Labels del tipo {1, 2}
             # problema di diverse dimensioni date dalle dimensioni: non avviene considerando 1023
             dataset_features = np.concatenate((dataset_features, np.array(features)), axis=0)
             classes_features = np.concatenate((classes_features, np.array(feat_label)), axis=0)
-
-    print(dataset.shape)
 
     labels = []
     labels_features = []
@@ -58,7 +61,7 @@ if __name__ == "__main__":
     labels = np.array(labels)
     train_dataset, val_dataset, train_labels, val_labels = train_test_split(dataset, labels, train_size=0.7,
                                                                             random_state=0)
-    val_dataset, test_dataset, val_labels, test_labels = train_test_split(val_dataset, val_labels, test_size=0.3,
+    val_dataset, test_dataset, val_labels, test_labels = train_test_split(val_dataset, val_labels, train_size=0.7,
                                                                           random_state=0)
 
     train_steps = int(np.ceil(train_dataset.shape[0] / batch_size))
@@ -76,19 +79,19 @@ if __name__ == "__main__":
 
     ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
 
-    # # USE OF EEGNET WITH FFT
-    #
-    # train_fft = extract_FFT(train_dataset)
-    # val_fft = extract_FFT(val_dataset)
-    # test_fft = extract_FFT(test_dataset)
-    #
-    # model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
-    # # model = tf.keras.models.load_model('models/EEGNet_fft.h5')
-    #
-    # results = model.evaluate(test_fft, test_labels, verbose=0)
-    # print("\nTest loss, Test accuracy: ", results)
-    #
-    # ablation(test_fft, test_labels, model, results[1])
+    # USE OF EEGNET WITH FFT
+
+    train_fft = extract_FFT(train_dataset, n_segments)
+    val_fft = extract_FFT(val_dataset, n_segments)
+    test_fft = extract_FFT(test_dataset, n_segments)
+
+    model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
+    # model = tf.keras.models.load_model('models/EEGNet_fft.h5')
+
+    results = model.evaluate(test_fft, test_labels, verbose=0)
+    print("\nTest loss, Test accuracy: ", results)
+
+    ablation(test_fft, test_labels, model, results[1])
 
     # # USE OF EEGNET WITH WAVELET
     #
