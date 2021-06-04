@@ -1,3 +1,6 @@
+import numpy as np
+import tensorflow as tf
+
 from EEGModels import EEGNet
 from functions_dataset import *
 from functions_network import *
@@ -31,7 +34,6 @@ if __name__ == "__main__":
 
             FBCSP_f = FBCSP(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
             features, feat_label = FBCSP_f.createDataMatrix()
-
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # Dataset completo
             classes = np.concatenate((classes, np.array(c)), axis=0)  # Labels del tipo {1, 2}
             # problema di diverse dimensioni date dalle dimensioni: non avviene considerando 1023
@@ -42,6 +44,7 @@ if __name__ == "__main__":
     labels_features = []
     for i in range(len(classes)):
         labels.append([1, 0] if classes[i] == 1 else [0, 1])
+    for i in range(len(classes_features)):
         labels_features.append([1, 0] if classes_features[i] == 1 else [0, 1])
 
     # Common hyperparameters for the training
@@ -65,35 +68,58 @@ if __name__ == "__main__":
                             'EEGNet_signal')
     # model = tf.keras.models.load_model('models/EEGNet_signal.h5')
 
-    results = model.evaluate(test_dataset, test_labels)
+    results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1])
+    ablation(test_dataset, test_labels, model, results[1], n_segments=7)
 
-    # USE OF EEGNET WITH FFT
+    # # USE OF EEGNET WITH FFT
+    #
+    # train_fft = extract_FFT(train_dataset)
+    # val_fft = extract_FFT(val_dataset)
+    # test_fft = extract_FFT(test_dataset)
+    #
+    # model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
+    # # model = tf.keras.models.load_model('models/EEGNet_fft.h5')
+    #
+    # results = model.evaluate(test_fft, test_labels, verbose=0)
+    # print("\nTest loss, Test accuracy: ", results)
+    #
+    # ablation(test_fft, test_labels, model, results[1])
 
-    train_fft = extract_FFT(train_dataset)
-    val_fft = extract_FFT(val_dataset)
-    test_fft = extract_FFT(test_dataset)
+    # # USE OF EEGNET WITH WAVELET
+    #
+    # train_wt = extract_wt(train_dataset)
+    # val_wt = extract_wt(val_dataset)
+    # test_wt = extract_wt(test_dataset)
+    #
+    # model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_wt')
+    # # model = tf.keras.models.load_model('models/EEGNet_wt.h5')
+    #
+    # results = model.evaluate(test_wt, test_labels, verbose=0)
+    # print("\nTest loss, Test accuracy: ", results)
+    #
+    # ablation(test_wt, test_labels, model, results[1])
 
-    model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
-    # model = tf.keras.models.load_model('models/EEGNet_fft.h5')
-
-    results = model.evaluate(test_fft, test_labels)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_fft, test_labels, model, results[1])
-
-    # USE OF EEGNET WITH WAVELET
-
-    train_wt = extract_wt(train_dataset)
-    val_wt = extract_wt(val_dataset)
-    test_wt = extract_wt(test_dataset)
-
-    model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_wt')
-    # model = tf.keras.models.load_model('models/EEGNet_wt.h5')
-
-    results = model.evaluate(test_wt, test_labels)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_wt, test_labels, model, results[1])
+    # USE OF EEGNET WITH FBCSP
+    #
+    # labels_features = np.array(labels_features)
+    # print(dataset_features.shape)
+    # print(labels_features.shape)
+    #
+    # train_data, val_data, train_labels, val_labels = train_test_split(dataset_features, labels_features,
+    #                                                                   train_size=0.7, random_state=0)
+    # val_data, test_data, val_labels, test_labels = train_test_split(val_data, val_labels, test_size=0.3,
+    #                                                                 random_state=0)
+    #
+    # input_shape = (1, train_data[0].shape[0])
+    #
+    # model = EEGNet(nb_classes=2, Chans=1, Samples=input_shape[1])
+    # model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+    # history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs,
+    #                     validation_data=(val_data, val_labels))
+    # plot_model_training(history, 'model_FBCSP')
+    # model.save('models/{}.h5'.format('model_FBCSP'))
+    #
+    # results = model.evaluate(test_data, test_labels, verbose=0)
+    # print("\nTest loss, Test accuracy: ", results)

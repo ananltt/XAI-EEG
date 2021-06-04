@@ -1,5 +1,5 @@
+import copy
 import numpy as np
-
 from EEGModels import EEGNet
 from matplotlib import pyplot as plt
 
@@ -12,13 +12,14 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
     history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs,
                         validation_data=(val_data, val_labels))
-    plot_model_training(history)
+    plot_model_training(history, model_name)
     model.save('models/{}.h5'.format(model_name))
 
     return model
 
 
 def plot_model_training(history, model_name):
+
     # accuracy
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -40,67 +41,81 @@ def plot_model_training(history, model_name):
     plt.close()
 
 
-def ablation(dataset, labels, model, total_accuracy, fs=250):
+def ablation(dataset, labels, model, total_accuracy, n_segments=4, n_channels=22):
 
-    differences = ablation_zero_segments(dataset, labels, model, total_accuracy)
+    differences = ablation_zero_segments(dataset, labels, model, total_accuracy, n_segments)
     print("\nAblation with zeros in the segments: ", differences)
 
-    differences = ablation_linear_segments(dataset, labels, model, total_accuracy)
+    differences = ablation_linear_segments(dataset, labels, model, total_accuracy, n_segments)
     print("\nAblation with linearity in the segments: ", differences)
 
-    differences = ablation_zero_channels(dataset, labels, model, total_accuracy)
+    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, n_channels)
     print("\nAblation with zeros in the channels: ", differences)
 
 
-def ablation_zero_segments(dataset, labels, model, accuracy, fs=250):  # dataset: ntrial * nchannel * nsample
+def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # ntrial * nchannel * nsample
 
-    differences = np.empty(4)
+    differences = np.empty(n_segments)
+    length = int(dataset.shape[2] / n_segments)
 
-    for k in range(4):
-        data = dataset
+    for k in range(n_segments):
+        data = copy.deepcopy(dataset)
 
-        start = k * fs
-        end = (k + 1) * fs
+        start = k * length
+        end = (k + 1) * length
 
-        data[:, :, start:end] = np.zeros((52, 22, end - start))
+        if (k + 2) * length > data.shape[2]:
+            end = data.shape[2]
 
-        results = model.evaluate(data, labels)
+        data[:, :, start:end] = np.zeros((data.shape[0], data.shape[1], end - start))
+
+        results = model.evaluate(data, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
 
 
-def ablation_linear_segments(dataset, labels, model, accuracy, fs=250):
-    differences = np.empty(4)
+def ablation_linear_segments(dataset, labels, model, accuracy, n_segments=4):
 
-    for k in range(4):
+    differences = np.empty(n_segments)
+    length = int(dataset.shape[2] / n_segments)
 
-        data = dataset
+    for k in range(n_segments):
 
-        start = k * fs
-        end = (k + 1) * fs
+        data = copy.deepcopy(dataset)
+
+        start = k * length
+        end = (k + 1) * length
+
+        if (k + 2) * length > data.shape[2]:
+            end = data.shape[2]
 
         for j in range(data.shape[0]):
             for i in range(data.shape[1]):
-                prev = data[j, i, start - 1]
+
+                prev = data[j, i, start]
                 cons = data[j, i, end - 1]
-                lin = np.linspace(prev, cons, num=250)
+                lin_len = end - start
+
+                lin = np.linspace(prev, cons, num=lin_len)
                 data[j, i, start:end] = lin
 
-        results = model.evaluate(data, labels)
+        results = model.evaluate(data, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
 
 
-def ablation_zero_channels(dataset, labels, model, accuracy):
-    differences = np.empty(22)
+def ablation_zero_channels(dataset, labels, model, accuracy, n_channels=22):
 
-    for k in range(22):
-        data = dataset
+    differences = np.empty(n_channels)
 
-        data[:, k, :] = np.zeros((52, 1000))
-        results = model.evaluate(data, labels)
+    for k in range(n_channels):
+
+        data = copy.deepcopy(dataset)
+
+        data[:, k, :] = np.zeros((data.shape[0], data.shape[2]))
+        results = model.evaluate(data, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
