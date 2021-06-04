@@ -1,3 +1,5 @@
+from sklearn.preprocessing import normalize
+
 from EEGModels import EEGNet
 from matplotlib import pyplot as plt
 from scipy.io import loadmat
@@ -45,7 +47,7 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     data = data.T
 
     for j in range(trials.shape[0]):
-        trials[j, :, :] = data[:, event_start[j] + windows_sample]
+        trials[j, :, :] = normalize(data[:, event_start[j] + windows_sample], axis=1)
 
     new_labels = []
     labels_name = {769: 1, 770: 2}

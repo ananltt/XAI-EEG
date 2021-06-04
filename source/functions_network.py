@@ -44,16 +44,16 @@ def plot_model_training(history, model_name):
 def ablation(dataset, labels, model, total_accuracy, n_segments=4, n_channels=22):
 
     differences = ablation_zero_segments(dataset, labels, model, total_accuracy, n_segments)
-    print("\nAblation with zeros in the segments: ", differences)
+    print("\nAblation with zeros in the segments: \n", differences)
 
     differences = ablation_linear_segments(dataset, labels, model, total_accuracy, n_segments)
-    print("\nAblation with linearity in the segments: ", differences)
+    print("\nAblation with linearity in the segments: \n", differences)
 
     differences = ablation_zero_channels(dataset, labels, model, total_accuracy, n_channels)
-    print("\nAblation with zeros in the channels: ", differences)
+    print("\nAblation with zeros in the channels: \n", differences)
 
 
-def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # ntrial * nchannel * nsample
+def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # n.trial * n.channel * n.sample
 
     differences = np.empty(n_segments)
     length = int(dataset.shape[2] / n_segments)

@@ -1,15 +1,16 @@
-import numpy as np
-import tensorflow as tf
-
+from FBCSP import FBCSP
 from EEGModels import EEGNet
 from functions_dataset import *
 from functions_network import *
+
 from sklearn.model_selection import train_test_split
-from FBCSP import FBCSP
+import numpy as np
+import tensorflow as tf
 
 if __name__ == "__main__":
 
     data_dir = 'dataset/EEG'
+    n_segments = 4
 
     fs = 250
     subjects = range(1, 10, 1)
@@ -39,6 +40,8 @@ if __name__ == "__main__":
             # problema di diverse dimensioni date dalle dimensioni: non avviene considerando 1023
             dataset_features = np.concatenate((dataset_features, np.array(features)), axis=0)
             classes_features = np.concatenate((classes_features, np.array(feat_label)), axis=0)
+
+    print(dataset.shape)
 
     labels = []
     labels_features = []
@@ -71,7 +74,7 @@ if __name__ == "__main__":
     results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], n_segments=7)
+    ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
 
     # # USE OF EEGNET WITH FFT
     #
