@@ -1,7 +1,5 @@
 from EEGModels import EEGNet
 from functions import *
-from FBCSP_V4 import FBCSP_V4
-
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
@@ -15,7 +13,7 @@ if __name__ == "__main__":
     reference = pd.read_csv(data_file, index_col=None, header=0)
     reference.columns = ['subject', 'trial', 'left_label', 'right_label']
 
-    dataset, labels = load_dataset(reference, data_dir) # dataset: n.trials x n.channels x n.samples
+    dataset, labels = load_dataset(reference, data_dir)  # dataset: n.trials x n.channels x n.samples
 
     classes = []
     for label in labels:
@@ -32,10 +30,10 @@ if __name__ == "__main__":
             values1.append(dataset[i])
 
     dict = {'0': np.stack(values0), '1': np.stack(values1)}
-    extractor = FBCSP_V4(dict, fs=250, freqs_band=np.linspace(4, 80, 10))
+    # extractor = FBCSP_V4(dict, fs=250, freqs_band=np.linspace(4, 80, 10))
     # data_matrix, label = extractor.createDataMatrix()
-    features1 = extractor.extractFeaturesForTraining() # metodo giusto?
-    print(features1[0].shape) # (1295, 8)-->per ciascun trial prende 8 features, ma così non riusciamo con EEGNet
+    # features1 = extractor.extractFeaturesForTraining() # metodo giusto?
+    # print(features1[0].shape) # (1295, 8)-->per ciascun trial prende 8 features, ma così non riusciamo con EEGNet
 
     # USE OF EEGNET WITHOUT FEATURES!!!!
 
@@ -79,9 +77,9 @@ if __name__ == "__main__":
     history = model.fit(x=train_dataset, y=train_labels, batch_size=batch_size, epochs=num_epochs,
                         validation_data=(val_dataset, val_labels))
     plot_model_training(history)
-    model.save('model_dataset.h5')
+    model.save('models/model_dataset.h5')
 
-    # model = tf.keras.models.load_model('model.h5')
+    # model = tf.keras.models.load_model('models/model.h5')
 
     results = model.evaluate(test_dataset, test_labels)
     print("\nTest loss, Test accuracy: ", results)
@@ -95,7 +93,7 @@ if __name__ == "__main__":
     differences = ablation_zero_channels(test_dataset, test_labels, model, results[1])
     print("\nAblation with zeros in the channels: ", differences)
 
-    # model_wt = tf.keras.models.load_model('model_wt.h5')
+    # model_wt = tf.keras.models.load_model('models/model_wt.h5')
     #
     # differences = ablation_zero_segments(test_wt, test_labels, model_wt, results[1])
     # print("\nAblation with zeros in the wavelet decomposition: ", differences)
