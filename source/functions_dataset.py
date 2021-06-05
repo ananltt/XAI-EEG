@@ -164,7 +164,7 @@ def extract_wt(matrix):
     data matrix
 
     :param matrix: data matrix for each the wavelet will be calculated (n.trials x n.channels x n.samples)
-    :return: matrix containing the detail components of data
+    :return: matrix containing the approximation components of data
     """
 
     approx_trials = []
@@ -231,7 +231,7 @@ def extractFBCSP(matrix, labels, n_features, fs=250):
     :param labels: labels corresponding to the trials in the data matrix
     :param n_features: minimum number of features to be extracted
     :param fs: sampling frequency of data
-    :return:
+    :return: data matrix with the features extracted for each trial
     """
 
     # Creation of the dictionary corresponding to the data matrix

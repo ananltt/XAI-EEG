@@ -40,7 +40,6 @@ def plot_model_training(history, model_name):
 
     :param history: history of the model training
     :param model_name: name of the model (will be name of the saved image)
-    :return:
     """
 
     # accuracy
@@ -65,6 +64,18 @@ def plot_model_training(history, model_name):
 
 
 def ablation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+    """
+    Function to perform different types of ablation according to the XAI definition
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param total_accuracy: accuracy obtained without ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_channels: number of channels to be evaluated with XAI
+    """
 
     differences = ablation_zero_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
     print("\nAblation with zeros in the segments: \n", differences)
@@ -77,12 +88,29 @@ def ablation(dataset, labels, model, total_accuracy, function_features=None, n_s
 
 
 def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=36):
+    """
+    Function to perform ablation separatly for each label present in the dataset    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    """
+
+    # Extract the unique labels
 
     classes, indexes = np.unique(labels, return_inverse=True, axis=0)
 
     for j, c in enumerate(classes):
 
         print("\nConsidering labels {}".format(c))
+
+        # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
 
         data = np.array([dataset[i] for i in range(len(indexes)) if indexes[i] == j])
         lab = np.repeat([c], data.shape[0], axis=0)
@@ -95,20 +123,40 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
         else:
             x = data
 
+        # Evaluate the model with the built dataset
+
         results = model.evaluate(x, lab, verbose=0)
 
+        # Perform ablation with the built dataset
         ablation(data, lab, model, results[1], function_features, n_segments, n_channels)
 
 
 def ablation_zero_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=36):
+    """
+    Function to perform ablation setting at zero the segment of the signal under investigation
 
-    differences = np.empty(n_segments)
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param accuracy: accuracy of the model with the whole dataset
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :return: each value of the array represents the difference of accuracy obtained without the corresponding segment
+    """
+
+    # Extract the indeces of each segment
+
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
+    differences = np.empty(n_segments)
 
     for k in range(n_segments):
 
         data = copy.deepcopy(dataset)
         start, end = indexes[k]
+
+        # Set at zero the segment under investigation and re-build the dataset
 
         data[:, :, start:end] = np.zeros((data.shape[0], data.shape[1], end - start))
 
@@ -120,6 +168,8 @@ def ablation_zero_segments(dataset, labels, model, accuracy, function_features=N
         else:
             x = data
 
+        # Evaluate difference of accuracy
+
         results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
@@ -127,13 +177,32 @@ def ablation_zero_segments(dataset, labels, model, accuracy, function_features=N
 
 
 def ablation_linear_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=36):
-    differences = np.empty(n_segments)
+    """
+    Function to perform ablation setting the segment under investigation with a linear function
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param accuracy: accuracy of the model with the whole dataset
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :return: each value of the array represents the difference of accuracy obtained without the corresponding segment
+    """
+
+    # Extract the indeces of the segments
+
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
+    differences = np.empty(n_segments)
 
     for k in range(n_segments):
 
         data = copy.deepcopy(dataset)
         start, end = indexes[k]
+
+        # For each channel inside each trial, substitute the segment under investigation with a linear function (between
+        # the extremities) and rebuild the dataset
 
         for j in range(data.shape[0]):
             for i in range(data.shape[1]):
@@ -152,6 +221,8 @@ def ablation_linear_segments(dataset, labels, model, accuracy, function_features
         else:
             x = data
 
+        # Evaluate the difference of accuracies
+
         results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
@@ -159,11 +230,27 @@ def ablation_linear_segments(dataset, labels, model, accuracy, function_features
 
 
 def ablation_zero_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22, n_features=22):
+    """
+    Function to perform ablation setting the signal from the channel under investigation at zero
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param accuracy: accuracy of the model with the whole dataset
+    :param function_features: function for the feature extraction of the dataset
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :return: each value of the array represents the difference of accuracy obtained without the corresponding segment
+    """
+
     differences = np.empty(n_channels)
 
     for k in range(n_channels):
 
         data = copy.deepcopy(dataset)
+
+        # Set the channel values of zero and rebuild the dataset
 
         data[:, k, :] = np.zeros((data.shape[0], data.shape[2]))
 
@@ -175,36 +262,77 @@ def ablation_zero_channels(dataset, labels, model, accuracy, function_features=N
         else:
             x = data
 
+        # Evaluate the difference of accuracies
+
         results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
 
 
-def permutation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+def permutation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22,
+                n_features=36):
+    """
+    Function to perform different types of permutation according to the XAI definition
 
-    differences = permutation_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param total_accuracy: accuracy obtained without ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    """
+
+    differences = permutation_segments(dataset, labels, model, total_accuracy, function_features, n_segments,
+                                       n_features)
     print("\nPermutation in the segments: \n", differences)
 
-    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels)
+    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels,
+                                         n_features)
     print("\nPermutation in the channels: \n", differences)
 
 
 def permutation_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=36):
+    """
+    Function to perform permutation substituting a segment of a channel of a trial with the same segment of the same
+    channel of another trial
 
-    differences = np.empty(n_segments)
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param accuracy: accuracy obtained without ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :return: each value of the array represents the difference of accuracy obtained without the corresponding segment
+    """
+
+    # Extract the indexes of the segments
+
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
+    differences = np.empty(n_segments)
 
     for k in range(n_segments):
 
         data = copy.deepcopy(dataset)
         start, end = indexes[k]
+
+        # Extract the random new trial, substitute the segment and rebuild the dataset
+
         list_trials = range(data.shape[0])
 
         for i in range(data.shape[0]):
-            actual_trials = [t for t in list_trials if t != i]
-            p = np.random.choice(actual_trials)
-            data[i, :, start:end] = data[p, :, start:end]
+            # list_channels = range(data.shape[1])
+            for j in range(data.shape[1]):
+                actual_trials = [t for t in list_trials if t != i]
+                p = np.random.choice(actual_trials)
+                # actual_channels = [c for c in list_channels if c != j]
+                # q = np.random.choice(actual_channels)
+                data[i, j, start:end] = data[p, j, start:end]
 
         if function_features is not None:
             if function_features.__name__ == "extractFBCSP":
@@ -214,6 +342,8 @@ def permutation_segments(dataset, labels, model, accuracy, function_features=Non
         else:
             x = data
 
+        # Evaluate the difference of accuracy
+
         results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
@@ -221,6 +351,19 @@ def permutation_segments(dataset, labels, model, accuracy, function_features=Non
 
 
 def permutation_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22, n_features=36):
+    """
+    Function to perform permutation substituting a channel with the same channel of another trial
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param accuracy: accuracy obtained without ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :return: each value of the array represents the difference of accuracy obtained without the corresponding segment
+    """
 
     differences = np.empty(n_channels)
 
@@ -228,6 +371,8 @@ def permutation_channels(dataset, labels, model, accuracy, function_features=Non
 
         data = copy.deepcopy(dataset)
         list_trials = range(data.shape[0])
+
+        # Select the random new trial, substitute the channel and rebuild the dataset
 
         for i in range(data.shape[0]):
             actual_trials = [t for t in list_trials if t != i]
@@ -241,6 +386,8 @@ def permutation_channels(dataset, labels, model, accuracy, function_features=Non
                 x = function_features(data)
         else:
             x = data
+
+        # Evaluate the difference of accuracies
 
         results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]

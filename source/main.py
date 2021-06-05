@@ -8,6 +8,11 @@ import os
 
 if __name__ == "__main__":
 
+    # TODO: capire se c'è qualcosa da fare di meglio con FBCSP, magari sentendoo Alberto se possiamo mettere più di
+    #  36 features
+    # TODO: capire come gestire la ri-costruzione del dataset dopo e.g. l'ablazione: basta fare una
+    #  nuova feature extraction o conviene fare qualcosa di più interessante?
+
     # sys.stdout = open("output/output.txt", "w")  # TO WRITE ALL OUTPUT IN A FILE
     data_dir = 'dataset/EEG'
     n_segments = 4
