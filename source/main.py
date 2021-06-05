@@ -2,7 +2,6 @@ from FBCSP import FBCSP
 from EEGModels import EEGNet
 from functions_dataset import *
 from functions_network import *
-from permutation import *
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
