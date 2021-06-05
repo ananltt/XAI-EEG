@@ -139,22 +139,11 @@ def extract_statistical_characteristics(matrix):
             sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)
             sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)
             sc_dataset[t, i, 8] = np.max(data) - np.min(data)
-            sc_dataset[t, i, 9] = 0 #TODO: trovare un'altra caratteristica statistica
+            sc_dataset[t, i, 9] = 0  #TODO: trovare un'altra caratteristica statistica
 
         sc_dataset[t, :, 10:] = np.corrcoef(trial)
 
     return np.array(sc_dataset)
-
-
-def extract_pearson_coefficients(matrix):
-
-    coeffs = np.zeros((matrix.shape[0], matrix.shape[1], matrix.shape[1]))
-
-    for t, trial in enumerate(matrix):
-        trial = np.matrix(trial)
-        coeffs[t, :, :] = np.corrcoef(trial)
-
-    return np.array(coeffs)
 
 
 def extractFBCSP(data, labels, n_features, fs=250):
