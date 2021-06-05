@@ -1,4 +1,6 @@
+import scipy
 from scipy import signal
+from scipy.stats import skew, kurtosis, entropy
 from sklearn.preprocessing import normalize
 from scipy.io import loadmat
 import numpy as np
@@ -60,7 +62,8 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
 
 def create_dict(dataset, labels, labels_name):
 
-    values2 = values1 = []
+    values1 = []
+    values2 = []
 
     for i in range(len(labels)):
         if (labels[i] == [1, 0]).all():
@@ -68,8 +71,9 @@ def create_dict(dataset, labels, labels_name):
         else:
             values2.append(dataset[i])
 
-    dict = {labels_name[1]: np.stack(values1), labels_name[2]: np.stack(values2)}
-    return dict
+    data_dict = {labels_name[1]: np.stack(values1), labels_name[2]: np.stack(values2)}
+
+    return data_dict
 
 
 def extract_indexes_segments(data_length, n_segments):
@@ -116,14 +120,54 @@ def extract_wt(matrix):
     return np.array(approx_trials)
 
 
+def extract_statistical_characteristics(matrix):
+
+    sc_dataset = np.zeros((matrix.shape[0], matrix.shape[1], matrix.shape[1] + 10))
+
+    for t, trial in enumerate(matrix):
+        trial = np.matrix(trial)
+
+        for i in range(trial.shape[0]):
+            data = trial[i, :]
+            sc = scipy.stats.describe(data, axis=1)
+            sc_dataset[t, i, 0] = sc.mean
+            sc_dataset[t, i, 1] = np.mean(np.square(data))
+            sc_dataset[t, i, 2] = sc.variance
+            sc_dataset[t, i, 3] = sc.skewness
+            sc_dataset[t, i, 4] = sc.kurtosis
+            sc_dataset[t, i, 5] = entropy(data, axis=1)
+            sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)
+            sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)
+            sc_dataset[t, i, 8] = np.max(data) - np.min(data)
+            sc_dataset[t, i, 9] = 0 #TODO: trovare un'altra caratteristica statistica
+
+        sc_dataset[t, :, 10:] = np.corrcoef(trial)
+
+    return np.array(sc_dataset)
+
+
+def extract_pearson_coefficients(matrix):
+
+    coeffs = np.zeros((matrix.shape[0], matrix.shape[1], matrix.shape[1]))
+
+    for t, trial in enumerate(matrix):
+        trial = np.matrix(trial)
+        coeffs[t, :, :] = np.corrcoef(trial)
+
+    return np.array(coeffs)
+
+
 def extractFBCSP(data, labels, n_features, fs=250):
 
     labels_name = {769: 'left', 770: 'right', 1: 'left', 2: 'right'}
 
     trials_dict = create_dict(data, labels, labels_name)
+
     FBCSP_f = FBCSP_V4(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
 
     fbcsp = FBCSP_f.extractFeaturesForTraining()
     fbcsp = np.concatenate((fbcsp[0], fbcsp[1]), axis=0)
 
-    return fbcsp
+    fbcsp = fbcsp.reshape((fbcsp.shape[0], 1, fbcsp.shape[1]))
+
+    return np.array(fbcsp)

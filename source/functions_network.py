@@ -7,10 +7,7 @@ from functions_dataset import extract_indexes_segments
 
 def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_name):
 
-    if len(train_data.shape) == 2:
-        input_shape = (train_data[1], 1) # ancora non funzionante per FBCSP!!
-    else:
-        input_shape = (train_data[0].shape[0], train_data[0].shape[1], 1)
+    input_shape = (train_data[0].shape[0], train_data[0].shape[1])
 
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
