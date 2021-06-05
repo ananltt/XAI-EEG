@@ -2,16 +2,15 @@ from FBCSP import FBCSP
 from EEGModels import EEGNet
 from functions_dataset import *
 from functions_network import *
-
+from permutation import *
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
 
 if __name__ == "__main__":
 
-    # TODO: nell'ablation considerare il caso di feature extraction
+    # TODO: nell'ablation considerare il caso di feature extraction -> fatto ma valori sempre uguali
     # TODO: sistemare FBCSP e capire come funziona
-    # TODO: implementare permutation per XAI
     # TODO: implementare saliency map
 
     data_dir = 'dataset/EEG'
@@ -79,6 +78,8 @@ if __name__ == "__main__":
 
     ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
     ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
+
+    permutation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
 
     # # USE OF EEGNET WITH FFT
     #

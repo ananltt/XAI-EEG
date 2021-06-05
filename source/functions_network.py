@@ -41,6 +41,7 @@ def plot_model_training(history, model_name):
 
 
 def ablation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+
     differences = ablation_zero_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
     print("\nAblation with zeros in the segments: \n", differences)
 
@@ -145,3 +146,62 @@ def ablation_zero_channels(dataset, labels, model, accuracy, function_features=N
     return differences
 
 
+def permutation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+
+    differences = permutation_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
+    print("\nPermutation in the segments: \n", differences)
+
+    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels)
+    print("\nPermutation in the channels: \n", differences)
+
+
+def permutation_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4):
+
+    differences = np.empty(n_segments)
+    indexes = extract_indexes_segments(dataset.shape[2], n_segments)
+
+    for k in range(n_segments):
+
+        data = copy.deepcopy(dataset)
+        start, end = indexes[k]
+        list_trials = range(data.shape[0])
+
+        for i in range(data.shape[0]):
+            actual_trials = [t for t in list_trials if t != i]
+            p = np.random.choice(actual_trials)
+            data[i, :, start:end] = data[p, :, start:end]
+
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, labels, verbose=0)
+        differences[k] = accuracy - results[1]
+
+    return differences
+
+
+def permutation_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22):
+
+    differences = np.empty(n_channels)
+
+    for k in range(n_channels):
+
+        data = copy.deepcopy(dataset)
+        list_trials = range(data.shape[0])
+
+        for i in range(data.shape[0]):
+            actual_trials = [t for t in list_trials if t != i]
+            p = np.random.choice(actual_trials)
+            data[i, k, :] = data[p, k, :]
+
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, labels, verbose=0)
+        differences[k] = accuracy - results[1]
+
+    return differences
