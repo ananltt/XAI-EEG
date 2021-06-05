@@ -70,28 +70,29 @@ if __name__ == "__main__":
 
     # USE OF EEGNET WITHOUT FEATURES
 
-    model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
-                            'EEGNet_signal')
-    # model = tf.keras.models.load_model('models/EEGNet_signal.h5')
+    # model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
+    #                         'EEGNet_signal')
+    model = tf.keras.models.load_model('models/EEGNet_signal.h5')
 
     results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
     ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
+    ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
 
-    # USE OF EEGNET WITH FFT
-
-    train_fft = extract_FFT(train_dataset, n_segments)
-    val_fft = extract_FFT(val_dataset, n_segments)
-    test_fft = extract_FFT(test_dataset, n_segments)
-
-    model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
+    # # USE OF EEGNET WITH FFT
+    #
+    # train_fft = extract_FFT(train_dataset, n_segments)
+    # val_fft = extract_FFT(val_dataset, n_segments)
+    # test_fft = extract_FFT(test_dataset, n_segments)
+    #
+    # # model = training_EEGNet(train_fft, train_labels, val_fft, val_labels, batch_size, num_epochs, 'EEGNet_fft')
     # model = tf.keras.models.load_model('models/EEGNet_fft.h5')
-
-    results = model.evaluate(test_fft, test_labels, verbose=0)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_fft, test_labels, model, results[1])
+    #
+    # results = model.evaluate(test_fft, test_labels, verbose=0)
+    # print("\nTest loss, Test accuracy: ", results)
+    #
+    # ablation(test_dataset, test_labels, model, results[1], extract_wt, n_segments)
 
     # # USE OF EEGNET WITH WAVELET
     #

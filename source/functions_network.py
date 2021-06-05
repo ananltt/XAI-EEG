@@ -6,7 +6,6 @@ from functions_dataset import extract_indexes_segments
 
 
 def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_name):
-
     input_shape = (train_data[0].shape[0], train_data[0].shape[1], 1)
 
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
@@ -20,7 +19,6 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
 
 
 def plot_model_training(history, model_name):
-
     # accuracy
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -42,19 +40,40 @@ def plot_model_training(history, model_name):
     plt.close()
 
 
-def ablation(dataset, labels, model, total_accuracy, n_segments=4, n_channels=22):
-
-    differences = ablation_zero_segments(dataset, labels, model, total_accuracy, n_segments)
+def ablation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+    differences = ablation_zero_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
     print("\nAblation with zeros in the segments: \n", differences)
 
-    differences = ablation_linear_segments(dataset, labels, model, total_accuracy, n_segments)
+    differences = ablation_linear_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
     print("\nAblation with linearity in the segments: \n", differences)
 
-    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, n_channels)
+    differences = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels)
     print("\nAblation with zeros in the channels: \n", differences)
 
 
-def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # n.trial * n.channel * n.sample
+def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22):
+
+    classes, indexes = np.unique(labels, return_inverse=True, axis=0)
+
+    for j, c in enumerate(classes):
+
+        print("\nConsidering labels {}".format(c))
+
+        data = np.array([dataset[i] for i in range(len(indexes)) if indexes[i] == j])
+        lab = np.repeat([c], data.shape[0], axis=0)
+
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, lab, verbose=0)
+        # print("\nTest loss, Test accuracy: ", results)
+
+        ablation(x, lab, model, results[1], function_features, n_segments, n_channels)
+
+
+def ablation_zero_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4):  # n.trial * n.channel * n.sample
 
     differences = np.empty(n_segments)
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
@@ -63,17 +82,21 @@ def ablation_zero_segments(dataset, labels, model, accuracy, n_segments=4):  # n
 
         data = copy.deepcopy(dataset)
         start, end = indexes[k]
-        print(start, end)
+
         data[:, :, start:end] = np.zeros((data.shape[0], data.shape[1], end - start))
 
-        results = model.evaluate(data, labels, verbose=0)
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
 
 
-def ablation_linear_segments(dataset, labels, model, accuracy, n_segments=4):
-
+def ablation_linear_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4):
     differences = np.empty(n_segments)
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
 
@@ -84,7 +107,6 @@ def ablation_linear_segments(dataset, labels, model, accuracy, n_segments=4):
 
         for j in range(data.shape[0]):
             for i in range(data.shape[1]):
-
                 prev = data[j, i, start]
                 cons = data[j, i, end - 1]
                 lin_len = end - start
@@ -92,14 +114,18 @@ def ablation_linear_segments(dataset, labels, model, accuracy, n_segments=4):
                 lin = np.linspace(prev, cons, num=lin_len)
                 data[j, i, start:end] = lin
 
-        results = model.evaluate(data, labels, verbose=0)
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
 
 
-def ablation_zero_channels(dataset, labels, model, accuracy, n_channels=22):
-
+def ablation_zero_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22):
     differences = np.empty(n_channels)
 
     for k in range(n_channels):
@@ -107,7 +133,15 @@ def ablation_zero_channels(dataset, labels, model, accuracy, n_channels=22):
         data = copy.deepcopy(dataset)
 
         data[:, k, :] = np.zeros((data.shape[0], data.shape[2]))
-        results = model.evaluate(data, labels, verbose=0)
+
+        if function_features is not None:
+            x = function_features(data)
+        else:
+            x = data
+
+        results = model.evaluate(x, labels, verbose=0)
         differences[k] = accuracy - results[1]
 
     return differences
+
+
