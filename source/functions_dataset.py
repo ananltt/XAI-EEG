@@ -5,6 +5,8 @@ import numpy as np
 from numpy.fft import rfft
 import pywt
 
+from source.FBCSP_V4 import FBCSP_V4
+
 
 def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
 
@@ -48,7 +50,7 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
         trials[j, :, :] = normalize(data[:, event_start[j] + windows_sample], axis=1)
 
     new_labels = []
-    labels_name = {769: 1, 770: 2}
+    labels_name = {769: [1, 0], 770: [0, 1]}
     for j in range(len(labels)):
         new_labels.append(labels_name[labels[j]])
     labels = new_labels
@@ -56,17 +58,17 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     return trials, labels
 
 
-def create_dict(dataset, classes, labels_name):
+def create_dict(dataset, labels, labels_name):
 
-    values0 = values1 = []
+    values2 = values1 = []
 
-    for i in range(len(classes)):
-        if classes[i] == 1:
-            values0.append(dataset[i])
-        else:
+    for i in range(len(labels)):
+        if (labels[i] == [1, 0]).all():
             values1.append(dataset[i])
+        else:
+            values2.append(dataset[i])
 
-    dict = {labels_name[1]: np.stack(values0), labels_name[2]: np.stack(values1)}
+    dict = {labels_name[1]: np.stack(values1), labels_name[2]: np.stack(values2)}
     return dict
 
 
@@ -112,3 +114,16 @@ def extract_wt(matrix):
             approx.append(np.concatenate((cA, cD)))
         approx_trials.append(approx)
     return np.array(approx_trials)
+
+
+def extractFBCSP(data, labels, n_features, fs=250):
+
+    labels_name = {769: 'left', 770: 'right', 1: 'left', 2: 'right'}
+
+    trials_dict = create_dict(data, labels, labels_name)
+    FBCSP_f = FBCSP_V4(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
+
+    fbcsp = FBCSP_f.extractFeaturesForTraining()
+    fbcsp = np.concatenate((fbcsp[0], fbcsp[1]), axis=0)
+
+    return fbcsp

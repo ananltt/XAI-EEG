@@ -6,6 +6,8 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
 
+from source.FBCSP_V4 import FBCSP_V4
+
 if __name__ == "__main__":
 
     # TODO: nell'ablation considerare il caso di feature extraction -> fatto ma valori sempre uguali
@@ -14,42 +16,22 @@ if __name__ == "__main__":
 
     data_dir = 'dataset/EEG'
     n_segments = 4
+    n_features = 22
 
     fs = 250
     subjects = range(1, 10, 1)
-    labels_name = {769: 'left', 770: 'right', 1: 'left', 2: 'right'}
-    n_features = 4
-    dataset, classes, dataset_features, classes_features = None, None, None, None
+
+    dataset, labels = None, None
 
     for subject in subjects:
 
         if dataset is None:
-
-            dataset, classes = load_dataset(data_dir, subjects[0])
-
-            trials_dict = create_dict(dataset, classes, labels_name)
-            FBCSP_f = FBCSP(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
-            dataset_features, classes_features = FBCSP_f.createDataMatrix()
+            dataset, labels = load_dataset(data_dir, subject)
 
         else:
-
-            d, c = load_dataset(data_dir, subject)
+            d, l = load_dataset(data_dir, subject)
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
-            classes = np.concatenate((classes, np.array(c)), axis=0)  # Labels {1, 2}
-
-            trials_dict = create_dict(d, c, labels_name)
-            FBCSP_f = FBCSP(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
-            features, feat_label = FBCSP_f.createDataMatrix()
-            # problema di diverse dimensioni date dalle dimensioni: non avviene considerando 1023
-            dataset_features = np.concatenate((dataset_features, np.array(features)), axis=0)
-            classes_features = np.concatenate((classes_features, np.array(feat_label)), axis=0)
-
-    labels = []
-    labels_features = []
-    for i in range(len(classes)):
-        labels.append([1, 0] if classes[i] == 1 else [0, 1])
-    for i in range(len(classes_features)):
-        labels_features.append([1, 0] if classes_features[i] == 1 else [0, 1])
+            labels = np.concatenate((labels, np.array(l)), axis=0)  # Labels {1, 2}
 
     # Common hyperparameters for the training
 
@@ -66,19 +48,19 @@ if __name__ == "__main__":
     val_steps = int(np.ceil(val_dataset.shape[0] / batch_size))
     test_steps = int(np.ceil(test_dataset.shape[0] / batch_size))
 
-    # USE OF EEGNET WITHOUT FEATURES
-
-    # model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
-    #                         'EEGNet_signal')
-    model = tf.keras.models.load_model('models/EEGNet_signal.h5')
-
-    results = model.evaluate(test_dataset, test_labels, verbose=0)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
-    ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
-
-    permutation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
+    # # USE OF EEGNET WITHOUT FEATURES
+    #
+    # # model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
+    # #                         'EEGNet_signal')
+    # model = tf.keras.models.load_model('models/EEGNet_signal.h5')
+    #
+    # results = model.evaluate(test_dataset, test_labels, verbose=0)
+    # print("\nTest loss, Test accuracy: ", results)
+    #
+    # ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
+    # ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
+    #
+    # permutation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
 
     # # USE OF EEGNET WITH FFT
     #
@@ -109,24 +91,13 @@ if __name__ == "__main__":
     # ablation(test_wt, test_labels, model, results[1])
 
     # USE OF EEGNET WITH FBCSP
-    #
-    # labels_features = np.array(labels_features)
-    # print(dataset_features.shape)
-    # print(labels_features.shape)
-    #
-    # train_data, val_data, train_labels, val_labels = train_test_split(dataset_features, labels_features,
-    #                                                                   train_size=0.7, random_state=0)
-    # val_data, test_data, val_labels, test_labels = train_test_split(val_data, val_labels, test_size=0.3,
-    #                                                                 random_state=0)
-    #
-    # input_shape = (1, train_data[0].shape[0])
-    #
-    # model = EEGNet(nb_classes=2, Chans=1, Samples=input_shape[1])
-    # model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-    # history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs,
-    #                     validation_data=(val_data, val_labels))
-    # plot_model_training(history, 'model_FBCSP')
-    # model.save('models/{}.h5'.format('model_FBCSP'))
-    #
+
+    train_fbcsp = extractFBCSP(train_dataset, train_labels, n_features)
+    val_fbcsp = extractFBCSP(val_dataset, val_labels, n_features)
+    test_fbcsp = extractFBCSP(test_dataset, test_labels, n_features)
+
+    model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
+                            'EEGNet_FBCSP')
+
     # results = model.evaluate(test_data, test_labels, verbose=0)
     # print("\nTest loss, Test accuracy: ", results)
