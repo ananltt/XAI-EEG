@@ -176,7 +176,7 @@ def extract_wt(matrix):
 
             # For the signals coming from each channel, extract the corresponding wavelet decomposition
 
-            ca, _ = pywt.dwt(channel, 'db11')
+            ca, _ = pywt.dwt(channel, 'sym9')
 
             approx.append(ca)
 

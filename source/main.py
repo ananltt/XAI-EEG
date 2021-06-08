@@ -1,6 +1,7 @@
 import sys
 from functions_dataset import *
 from functions_network import *
+from features_variation import *
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
@@ -29,7 +30,7 @@ if __name__ == "__main__":
 
     # Common hyperparameters for the training
 
-    batch_size = 16
+    batch_size = 32
     num_epochs = 50
 
     labels = np.array(labels)
@@ -41,6 +42,8 @@ if __name__ == "__main__":
     train_steps = int(np.ceil(train_dataset.shape[0] / batch_size))
     val_steps = int(np.ceil(val_dataset.shape[0] / batch_size))
     test_steps = int(np.ceil(test_dataset.shape[0] / batch_size))
+
+    features_variation(train_dataset[0][0])
 
     # USE OF EEGNET WITHOUT FEATURES
 
