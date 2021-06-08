@@ -176,7 +176,7 @@ def extract_wt(matrix):
 
             # For the signals coming from each channel, extract the corresponding wavelet decomposition
 
-            ca, _ = pywt.dwt(channel, 'db1')
+            ca, _ = pywt.dwt(channel, 'db11')
 
             approx.append(ca)
 
@@ -241,12 +241,12 @@ def extractFBCSP(matrix, labels, n_features, fs=250):
     # Extraction of the FBCSP feature for the current dictionary and concatenation (needed because it returns two
     # matrices of features, one for each label
 
-    FBCSP_f = FBCSP_V4(trials_dict, fs, n_w=2, n_features=n_features, print_var=True)
+    FBCSP_f = FBCSP_V4(trials_dict, fs, n_w=22, n_features=n_features, print_var=True)
     fbcsp = FBCSP_f.extractFeaturesForTraining()
     fbcsp = np.concatenate((fbcsp[0], fbcsp[1]), axis=0)
 
-    if fbcsp.shape[1] < 36:
-        pad = np.zeros((fbcsp.shape[0], 36))
+    if fbcsp.shape[1] < n_features:
+        pad = np.zeros((fbcsp.shape[0], n_features))
         pad[:, :fbcsp.shape[1]] = fbcsp
         fbcsp = pad
 
