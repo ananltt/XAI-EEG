@@ -71,10 +71,10 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param total_accuracy: accuracy obtained without ablation
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted from FBCSP
     """
 
     accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features)
@@ -127,6 +127,7 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
         # Evaluate the model with the built dataset
 
         results = model.evaluate(x, lab, verbose=0)
+        print("\nTest loss, Test accuracy: ", results)
 
         # Perform ablation with the built dataset
         ablation(data, lab, model, function_features, n_segments, n_channels, n_features)

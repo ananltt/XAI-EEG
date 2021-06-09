@@ -1,7 +1,6 @@
 import sys
 from functions_dataset import *
 from functions_network import *
-from features_variation import *
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
@@ -35,11 +34,11 @@ if __name__ == "__main__":
 
     labels = np.array(labels)
     train_dataset, val_dataset, train_labels, val_labels = train_test_split(dataset, labels, train_size=0.7,
-                                                                            random_state=0)
+                                                                            random_state=1)
     val_dataset, test_dataset, val_labels, test_labels = train_test_split(val_dataset, val_labels, train_size=0.7,
-                                                                          random_state=0)
+                                                                          random_state=1)
 
-    features_variation(train_dataset[0][0])
+    wavelet_variation(train_dataset[0][0])
 
     # USE OF EEGNET WITHOUT FEATURES
 

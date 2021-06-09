@@ -1,4 +1,7 @@
+import copy
+
 import scipy
+from matplotlib import pyplot as plt
 from scipy import signal
 from scipy.stats import entropy
 from sklearn.preprocessing import normalize
@@ -132,32 +135,6 @@ def extract_indexes_segments(data_length, n_segments):
     return indexes
 
 
-def extract_psd(matrix, fs=250):
-    """
-    Extract the power spectral density of each channel of each trial inside the data matrix
-
-    :param matrix: data matrix for each the psd will be calculated (n.trials x n.channels x n.samples)
-    :param fs: sampling frequency of the data
-    :return: matrix containing the psd instead of the signal samples
-    """
-
-    fft_dataset = np.zeros((matrix.shape[0], matrix.shape[1], 129))
-
-    for t, trial in enumerate(matrix):
-
-        trial = np.matrix(trial)
-
-        for i in range(trial.shape[0]):
-
-            # For the signals coming from each channel, extract the corresponding psd
-
-            data = trial[i, :]
-            freqs, psd = signal.welch(data, fs=fs)
-            fft_dataset[t, i, :] = psd
-
-    return np.array(fft_dataset)
-
-
 def extract_wt(matrix):
     """
     Extract the approximation component obtained with wavelet decomposition of each channel of each trial inside the
@@ -183,6 +160,32 @@ def extract_wt(matrix):
         approx_trials.append(approx)
 
     return np.array(approx_trials)
+
+
+def extract_psd(matrix, fs=250):
+    """
+    Extract the power spectral density of each channel of each trial inside the data matrix
+
+    :param matrix: data matrix for each the psd will be calculated (n.trials x n.channels x n.samples)
+    :param fs: sampling frequency of the data
+    :return: matrix containing the psd instead of the signal samples
+    """
+
+    fft_dataset = np.zeros((matrix.shape[0], matrix.shape[1], 129))
+
+    for t, trial in enumerate(matrix):
+
+        trial = np.matrix(trial)
+
+        for i in range(trial.shape[0]):
+
+            # For the signals coming from each channel, extract the corresponding psd
+
+            data = trial[i, :]
+            freqs, psd = signal.welch(data, fs=fs)
+            fft_dataset[t, i, :] = psd
+
+    return np.array(fft_dataset)
 
 
 def extract_statistical_characteristics(matrix):
@@ -255,3 +258,41 @@ def extractFBCSP(matrix, labels, n_features, fs=250):
     fbcsp = fbcsp.reshape((fbcsp.shape[0], 1, fbcsp.shape[1]))
 
     return np.array(fbcsp)
+
+
+def wavelet_variation(signal, n_segments=8, seg_index=2):
+
+    ca_all, cd_all = pywt.dwt(signal, 'db1')
+
+    indexes = extract_indexes_segments(len(signal), n_segments)
+    i = seg_index - 1
+    start, end = indexes[i]
+
+    signal_zero = copy.deepcopy(signal)
+    signal_zero[start:end] = np.zeros(end - start)
+    ca_zero, cd = pywt.dwt(signal_zero, 'db1')
+
+    signal_linear = copy.deepcopy(signal)
+    signal_linear[start:end] = np.linspace(signal_linear[start], signal_linear[end - 1], num=end - start)
+    ca_linear, cd = pywt.dwt(signal_zero, 'db1')
+
+    # Plot results
+    fig, axes = plt.subplots(3, 2)
+    fig.tight_layout(h_pad=2)
+
+    axes[0, 0].set_title("Signal")
+    axes[0, 0].plot(signal)
+    axes[0, 1].set_title("Signal Wavelet")
+    axes[0, 1].plot(ca_all)
+
+    axes[1, 0].set_title("Zero-Ablation")
+    axes[1, 0].plot(signal_zero)
+    axes[1, 1].set_title("Zero-Ablation Wavelet")
+    axes[1, 1].plot(ca_zero)
+
+    axes[2, 0].set_title("Interpolation-Ablation")
+    axes[2, 0].plot(signal_linear)
+    axes[2, 1].set_title("Interpolation-Ablation Wavelet")
+    axes[2, 1].plot(ca_linear)
+    plt.savefig('output/signal-wavelet.png', bbox_inches='tight')
+    plt.show()
