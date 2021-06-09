@@ -58,7 +58,7 @@ class FBCSP_V4():
         self.features_band_list = []
         self.spatialFilteringAndFeatureExtraction()
         
-        # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        # # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # # Training of the classifier
         # if(classifier != None): self.trainClassifier(classifier = classifier)
         # else: self.trainClassifier()
