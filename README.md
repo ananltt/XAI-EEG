@@ -21,6 +21,9 @@ TASKs:
 
 ## Project structure
 
+**NOTE:**
+if line 12 of main.py is not commented, all the standard output will be saved in the text file 'output/output.txt' and not shown with the standard visualization. 
+
 All the source code is reported in 'source' folder.
 
 As first step, it is necessary to execute dataloading.m script: it needs to find the dataset download in 'dataset' folder, and it extracts the data, and the correspondent labels in 'dataset/EEG' folder. To modify the path to the folder, it is necessary to change it at line 9 of the cited file. 
@@ -32,5 +35,3 @@ In particular, functions_dataset.py contains all the functions needed for the da
 Finally, in 'other_scripts/test.py' are reported some other networks tested for this project. 
 
 All the output will be saved in 'output' folder, while the models will be saved in the 'models' folder. 
-
-Note: if line 12 of main.py is not commented, all the standard output will be saved in the text file 'output/output.txt' and not shown with the standard visualization. 
