@@ -58,10 +58,10 @@ if __name__ == "__main__":
     results = model.evaluate(test_sc, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], extract_statistical_characteristics, n_segments)
+    ablation(test_dataset, test_labels, model, extract_statistical_characteristics, n_segments)
     ablation_label_depending(test_dataset, test_labels, model, extract_statistical_characteristics, n_segments)
 
-    permutation(test_dataset, test_labels, model, results[1], extract_statistical_characteristics, n_segments)
+    permutation(test_dataset, test_labels, model, extract_statistical_characteristics, n_segments)
 
     # USE OF EEGNET WITH PSD
 
@@ -79,9 +79,9 @@ if __name__ == "__main__":
     results = model.evaluate(test_psd, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], extract_psd, n_segments)
+    ablation(test_dataset, test_labels, model, extract_psd, n_segments)
     ablation_label_depending(test_dataset, test_labels, model, extract_psd, n_segments)
 
-    permutation(test_dataset, test_labels, model, results[1], extract_psd, n_segments)
+    permutation(test_dataset, test_labels, model, extract_psd, n_segments)
 
     sys.stdout.close()

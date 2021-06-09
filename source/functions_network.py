@@ -63,7 +63,7 @@ def plot_model_training(history, model_name):
     plt.close()
 
 
-def ablation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22):
+def ablation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396):
     """
     Function to perform different types of ablation according to the XAI definition
 
@@ -77,21 +77,22 @@ def ablation(dataset, labels, model, total_accuracy, function_features=None, n_s
     :param n_channels: number of channels to be evaluated with XAI
     """
 
-    accuracies = ablation_zero_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
+    accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features)
     print("\nAblation with zeros in the segments: \n", accuracies)
 
-    accuracies = ablation_linear_segments(dataset, labels, model, total_accuracy, function_features, n_segments)
+    accuracies = ablation_linear_segments(dataset, labels, model, function_features, n_segments, n_features)
     print("\nAblation with linearity in the segments: \n", accuracies)
 
-    accuracies = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels)
+    accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
     print("\nAblation with zeros in the channels: \n", accuracies)
 
 
 def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396):
     """
-    Function to perform ablation separatly for each label present in the dataset    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
-    be without feature extraction)
+    Function to perform ablation separately for each label present in the dataset
 
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
     :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
     be without feature extraction)
     :param labels: labels corresponding to the dataset
@@ -128,10 +129,10 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
         results = model.evaluate(x, lab, verbose=0)
 
         # Perform ablation with the built dataset
-        ablation(data, lab, model, results[1], function_features, n_segments, n_channels)
+        ablation(data, lab, model, function_features, n_segments, n_channels, n_features)
 
 
-def ablation_zero_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=396):
+def ablation_zero_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
     """
     Function to perform ablation setting at zero the segment of the signal under investigation
 
@@ -139,14 +140,13 @@ def ablation_zero_segments(dataset, labels, model, accuracy, function_features=N
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param accuracy: accuracy of the model with the whole dataset
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
-    # Extract the indeces of each segment
+    # Extract the indices of each segment
 
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
     accuracies = np.empty(n_segments)
@@ -176,7 +176,7 @@ def ablation_zero_segments(dataset, labels, model, accuracy, function_features=N
     return accuracies
 
 
-def ablation_linear_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=396):
+def ablation_linear_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
     """
     Function to perform ablation setting the segment under investigation with a linear function
 
@@ -184,7 +184,6 @@ def ablation_linear_segments(dataset, labels, model, accuracy, function_features
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param accuracy: accuracy of the model with the whole dataset
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
@@ -229,7 +228,7 @@ def ablation_linear_segments(dataset, labels, model, accuracy, function_features
     return accuracies
 
 
-def ablation_zero_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22, n_features=396):
+def ablation_zero_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396):
     """
     Function to perform ablation setting the signal from the channel under investigation at zero
 
@@ -237,7 +236,6 @@ def ablation_zero_channels(dataset, labels, model, accuracy, function_features=N
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param accuracy: accuracy of the model with the whole dataset
     :param function_features: function for the feature extraction of the dataset
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
@@ -270,8 +268,8 @@ def ablation_zero_channels(dataset, labels, model, accuracy, function_features=N
     return accuracies
 
 
-def permutation(dataset, labels, model, total_accuracy, function_features=None, n_segments=4, n_channels=22,
-                n_features=36):
+def permutation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
+                n_features=396):
     """
     Function to perform different types of permutation according to the XAI definition
 
@@ -279,23 +277,20 @@ def permutation(dataset, labels, model, total_accuracy, function_features=None, 
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param total_accuracy: accuracy obtained without ablation
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
     """
 
-    accuracies = permutation_segments(dataset, labels, model, total_accuracy, function_features, n_segments,
-                                      n_features)
+    accuracies = permutation_segments(dataset, labels, model, function_features, n_segments, n_features)
     print("\nPermutation in the segments: \n", accuracies)
 
-    accuracies = ablation_zero_channels(dataset, labels, model, total_accuracy, function_features, n_channels,
-                                        n_features)
+    accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
     print("\nPermutation in the channels: \n", accuracies)
 
 
-def permutation_segments(dataset, labels, model, accuracy, function_features=None, n_segments=4, n_features=36):
+def permutation_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
     """
     Function to perform permutation substituting a segment of a channel of a trial with the same segment of the same
     channel of another trial
@@ -304,7 +299,6 @@ def permutation_segments(dataset, labels, model, accuracy, function_features=Non
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param accuracy: accuracy obtained without ablation
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
@@ -350,7 +344,7 @@ def permutation_segments(dataset, labels, model, accuracy, function_features=Non
     return accuracies
 
 
-def permutation_channels(dataset, labels, model, accuracy, function_features=None, n_channels=22, n_features=36):
+def permutation_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396):
     """
     Function to perform permutation substituting a channel with the same channel of another trial
 
@@ -358,7 +352,6 @@ def permutation_channels(dataset, labels, model, accuracy, function_features=Non
     be without feature extraction)
     :param labels: labels corresponding to the dataset
     :param model: model on which evaluate the ablation
-    :param accuracy: accuracy obtained without ablation
     :param function_features: function for the feature extraction of the dataset
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP

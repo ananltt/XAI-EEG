@@ -21,12 +21,12 @@ if __name__ == "__main__":
     for subject in subjects:
 
         if dataset is None:
-            dataset, labels = load_dataset(data_dir, subject)
+            dataset, labels = load_dataset(data_dir, subject, consider_artefacts=False)
 
         else:
-            d, l = load_dataset(data_dir, subject)
+            d, l = load_dataset(data_dir, subject, consider_artefacts=False)
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
-            labels = np.concatenate((labels, np.array(l)), axis=0)  # Labels {1, 2}
+            labels = np.concatenate((labels, np.array(l)), axis=0)
 
     # Common hyperparameters for the training
 
@@ -35,13 +35,9 @@ if __name__ == "__main__":
 
     labels = np.array(labels)
     train_dataset, val_dataset, train_labels, val_labels = train_test_split(dataset, labels, train_size=0.7,
-                                                                            shuffle=True, random_state=0)
+                                                                            random_state=0)
     val_dataset, test_dataset, val_labels, test_labels = train_test_split(val_dataset, val_labels, train_size=0.7,
-                                                                          shuffle=True, random_state=0)
-
-    train_steps = int(np.ceil(train_dataset.shape[0] / batch_size))
-    val_steps = int(np.ceil(val_dataset.shape[0] / batch_size))
-    test_steps = int(np.ceil(test_dataset.shape[0] / batch_size))
+                                                                          random_state=0)
 
     features_variation(train_dataset[0][0])
 
@@ -58,10 +54,10 @@ if __name__ == "__main__":
     results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
+    ablation(test_dataset, test_labels, model, n_segments=n_segments)
     ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
 
-    permutation(test_dataset, test_labels, model, results[1], n_segments=n_segments)
+    permutation(test_dataset, test_labels, model, n_segments=n_segments)
 
     # USE OF EEGNET WITH WAVELET
 
@@ -79,10 +75,10 @@ if __name__ == "__main__":
     results = model.evaluate(test_wt, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], extract_wt, n_segments)
+    ablation(test_dataset, test_labels, model, extract_wt, n_segments)
     ablation_label_depending(test_dataset, test_labels, model, extract_wt, n_segments)
 
-    permutation(test_dataset, test_labels, model, results[1], extract_wt, n_segments)
+    permutation(test_dataset, test_labels, model, extract_wt, n_segments)
 
     # USE OF EEGNET WITH FBCSP
 
@@ -101,9 +97,9 @@ if __name__ == "__main__":
     results = model.evaluate(test_fbcsp, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    ablation(test_dataset, test_labels, model, results[1], extractFBCSP, n_segments)
+    ablation(test_dataset, test_labels, model, extractFBCSP, n_segments)
     # ablation_label_depending(test_dataset, test_labels, model, extractFBCSP, n_segments)
 
-    permutation(test_dataset, test_labels, model, results[1], extractFBCSP, n_segments)
+    permutation(test_dataset, test_labels, model, extractFBCSP, n_segments)
 
     sys.stdout.close()
