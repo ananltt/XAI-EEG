@@ -1,5 +1,4 @@
 import copy
-
 import scipy
 from matplotlib import pyplot as plt
 from scipy import signal
@@ -213,10 +212,10 @@ def extract_statistical_characteristics(matrix):
             sc_dataset[t, i, 3] = sc.skewness
             sc_dataset[t, i, 4] = sc.kurtosis
             sc_dataset[t, i, 5] = entropy(data, axis=1)
-            sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)  # area under the (rectified) curve
-            sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)  # number of zero-crossing
-            sc_dataset[t, i, 8] = np.max(data) - np.min(data)  # peak-to-peak
-            sc_dataset[t, i, 9] = 0  #TODO: trovare un'altra caratteristica statistica
+            sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)      # area under the (rectified) curve
+            sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)    # number of zero-crossing
+            sc_dataset[t, i, 8] = np.max(data) - np.min(data)           # peak-to-peak
+            sc_dataset[t, i, 9] = 0
 
         sc_dataset[t, :, 10:] = np.corrcoef(trial)  # Pearson Correlation Coefficients between channels
 

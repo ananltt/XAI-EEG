@@ -29,7 +29,7 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
                         validation_data=(val_data, val_labels), verbose=2)
 
     plot_model_training(history, model_name)
-    model.save('models/{}.h5'.format(model_name))
+    model.save('../models/{}.h5'.format(model_name))
 
     return model
 
@@ -49,7 +49,7 @@ def plot_model_training(history, model_name):
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('output/model_accuracy_{}.png'.format(model_name))
+    plt.savefig('../output/model_accuracy_{}.png'.format(model_name))
     plt.close()
 
     # loss
@@ -59,7 +59,7 @@ def plot_model_training(history, model_name):
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('output/model_loss_{}.png'.format(model_name))
+    plt.savefig('../output/model_loss_{}.png'.format(model_name))
     plt.close()
 
 
@@ -87,7 +87,8 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     print("\nAblation with zeros in the channels: \n", accuracies)
 
 
-def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396):
+def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
+                             n_features=396):
     """
     Function to perform ablation separately for each label present in the dataset
 
@@ -191,7 +192,7 @@ def ablation_linear_segments(dataset, labels, model, function_features=None, n_s
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
-    # Extract the indeces of the segments
+    # Extract the indices of the segments
 
     indexes = extract_indexes_segments(dataset.shape[2], n_segments)
     accuracies = np.empty(n_segments)
