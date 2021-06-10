@@ -52,7 +52,8 @@ if __name__ == "__main__":
     test_sc = extract_statistical_characteristics(test_dataset)
 
     if not os.path.exists('../models/EEGNet_sc.h5'):
-        model = training_EEGNet(train_sc, train_labels, val_sc, val_labels, batch_size, num_epochs, 'EEGNet_sc')
+        model = training_EEGNet(train_sc, train_labels, val_sc, val_labels, batch_size, num_epochs,
+                                '../../models/EEGNet_sc')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_sc.h5')
 
@@ -73,7 +74,8 @@ if __name__ == "__main__":
     test_psd = extract_psd(test_dataset)
 
     if not os.path.exists('../models/EEGNet_psd.h5'):
-        model = training_EEGNet(train_psd, train_labels, val_psd, val_labels, batch_size, num_epochs, 'EEGNet_psd')
+        model = training_EEGNet(train_psd, train_labels, val_psd, val_labels, batch_size, num_epochs,
+                                '../../models/EEGNet_psd')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_psd.h5')
 

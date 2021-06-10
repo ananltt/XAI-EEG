@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     if not os.path.exists('../models/EEGNet_signal.h5'):
         model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
-                                'EEGNet_signal')
+                                '../models/EEGNet_signal')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_signal.h5')
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     test_wt = extract_wt(test_dataset)
 
     if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs, 'EEGNet_wt')
+        model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs, '../models/EEGNet_wt')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 
     if not os.path.exists('../models/EEGNet_FBCSP.h5'):
         model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
-                                'EEGNet_FBCSP')
+                                '../models/EEGNet_FBCSP')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_FBCSP.h5')
 

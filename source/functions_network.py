@@ -16,7 +16,7 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
     :param val_labels: validation labels
     :param batch_size: batch size for training
     :param num_epochs: number of epochs for training
-    :param model_name: model name
+    :param model_name: path and model name
     :return: trained model
     """
 
@@ -29,7 +29,7 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
                         validation_data=(val_data, val_labels), verbose=2)
 
     plot_model_training(history, model_name)
-    model.save('../models/{}.h5'.format(model_name))
+    model.save('{}.h5'.format(model_name))
 
     return model
 
