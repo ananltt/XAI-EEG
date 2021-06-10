@@ -1,6 +1,6 @@
 import sys
-from ..functions_network import *
-from ..functions_dataset import *
+from source.functions_network import *
+from source.functions_dataset import *
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     if not os.path.exists('../models/EEGNet_sc.h5'):
         model = training_EEGNet(train_sc, train_labels, val_sc, val_labels, batch_size, num_epochs,
-                                '../../models/EEGNet_sc')
+                                '../models/EEGNet_sc')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_sc.h5')
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     if not os.path.exists('../models/EEGNet_psd.h5'):
         model = training_EEGNet(train_psd, train_labels, val_psd, val_labels, batch_size, num_epochs,
-                                '../../models/EEGNet_psd')
+                                '../models/EEGNet_psd')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_psd.h5')
 

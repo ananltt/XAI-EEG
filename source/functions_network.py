@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from functions_dataset import extract_indexes_segments
 
 
-def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_name):
+def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_path):
     """
     Function for the training of an EEGNet. In general, have been used categorical_crossentropy as loss function, adam
     optimizer and accuracy as metric. The trained model is then saved and loss and accuracy are plotted.
@@ -16,7 +16,7 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
     :param val_labels: validation labels
     :param batch_size: batch size for training
     :param num_epochs: number of epochs for training
-    :param model_name: path and model name
+    :param model_path: path and model name
     :return: trained model
     """
 
@@ -28,8 +28,8 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
     history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs,
                         validation_data=(val_data, val_labels), verbose=2)
 
-    plot_model_training(history, model_name)
-    model.save('{}.h5'.format(model_name))
+    plot_model_training(history, model_path)
+    model.save('{}.h5'.format(model_path))
 
     return model
 
@@ -59,7 +59,7 @@ def plot_model_training(history, model_name):
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('../output/model_loss_{}.png'.format(model_name))
+    plt.savefig('..png'.format(model_name))
     plt.close()
 
 

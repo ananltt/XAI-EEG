@@ -69,7 +69,8 @@ if __name__ == "__main__":
     test_wt = extract_wt(test_dataset)
 
     if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs, '../models/EEGNet_wt')
+        model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs,
+                                '../models/EEGNet_wt')
     else:
         model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
