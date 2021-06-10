@@ -266,11 +266,11 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     interpolation and each respective approximation term of the Wavelet transformation.
     
     :param signal: signal to be processed
-    :param n_segment: number of segments in which the signal will be extracted
+    :param n_segments: number of segments in which the signal will be extracted
     :param seg_index: index of the segment to which apply the ablation mechanism
     """
 
-    ca_all, cd_all = pywt.dwt(signal, 'db1')
+    ca_all, cd_all = pywt.dwt(signal, 'sym9')
 
     indexes = extract_indexes_segments(len(signal), n_segments)
     i = seg_index - 1
@@ -278,11 +278,11 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
 
     signal_zero = copy.deepcopy(signal)
     signal_zero[start:end] = np.zeros(end - start)
-    ca_zero, cd = pywt.dwt(signal_zero, 'db1')
+    ca_zero, cd = pywt.dwt(signal_zero, 'sym9')
 
     signal_linear = copy.deepcopy(signal)
     signal_linear[start:end] = np.linspace(signal_linear[start], signal_linear[end - 1], num=end - start)
-    ca_linear, cd = pywt.dwt(signal_zero, 'db1')
+    ca_linear, cd = pywt.dwt(signal_zero, 'sym9')
 
     # Plot results
     fig, axes = plt.subplots(3, 2)
@@ -302,5 +302,5 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     axes[2, 0].plot(signal_linear)
     axes[2, 1].set_title("Interpolation-Ablation Wavelet")
     axes[2, 1].plot(ca_linear)
-    plt.savefig('output/signal-wavelet.png', bbox_inches='tight')
+    plt.savefig('../output/signal-wavelet.png', bbox_inches='tight')
     plt.show()

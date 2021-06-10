@@ -44,11 +44,11 @@ if __name__ == "__main__":
 
     print("\nSIGNAL DATASET:\n")
 
-    if not os.path.exists('models/EEGNet_signal.h5'):
+    if not os.path.exists('../models/EEGNet_signal.h5'):
         model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
                                 'EEGNet_signal')
     else:
-        model = tf.keras.models.load_model('models/EEGNet_signal.h5')
+        model = tf.keras.models.load_model('../models/EEGNet_signal.h5')
 
     results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
@@ -66,10 +66,10 @@ if __name__ == "__main__":
     val_wt = extract_wt(val_dataset)
     test_wt = extract_wt(test_dataset)
 
-    if not os.path.exists('models/EEGNet_wt.h5'):
+    if not os.path.exists('../models/EEGNet_wt.h5'):
         model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs, 'EEGNet_wt')
     else:
-        model = tf.keras.models.load_model('models/EEGNet_wt.h5')
+        model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
     results = model.evaluate(test_wt, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
@@ -87,11 +87,11 @@ if __name__ == "__main__":
     val_fbcsp = extractFBCSP(val_dataset, val_labels, n_features)
     test_fbcsp = extractFBCSP(test_dataset, test_labels, n_features)
 
-    if not os.path.exists('models/EEGNet_FBCSP.h5'):
+    if not os.path.exists('../models/EEGNet_FBCSP.h5'):
         model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
                                 'EEGNet_FBCSP')
     else:
-        model = tf.keras.models.load_model('models/EEGNet_FBCSP.h5')
+        model = tf.keras.models.load_model('../models/EEGNet_FBCSP.h5')
 
     results = model.evaluate(test_fbcsp, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
