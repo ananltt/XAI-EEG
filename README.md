@@ -34,7 +34,7 @@ All the implemented functions can be found in the 'source' folder. In particular
 
 Finally, in test.py are reported some other networks tested for this project. 
 
-All the output will be saved in 'output' folder, while the models will be saved in the 'models' folder. 
+All the output will be saved in 'output' folder, while the models and the plots regarding the training procedure will be saved in the 'models' folder. 
 
 ### Requirements
 

@@ -49,7 +49,7 @@ def plot_model_training(history, model_name):
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('../output/model_accuracy_{}.png'.format(model_name))
+    plt.savefig('{}_accuracy.png'.format(model_name))
     plt.close()
 
     # loss
@@ -59,7 +59,7 @@ def plot_model_training(history, model_name):
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('..png'.format(model_name))
+    plt.savefig('{}_loss.png'.format(model_name))
     plt.close()
 
 
