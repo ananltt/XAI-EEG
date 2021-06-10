@@ -35,3 +35,8 @@ All the implemented functions can be found in the 'source' folder. In particular
 Finally, in 'other_scripts/test.py' are reported some other networks tested for this project. 
 
 All the output will be saved in 'output' folder, while the models will be saved in the 'models' folder. 
+
+### Requirements
+
+- Biosig toolbox in Matlab
+- tensorflow in Python

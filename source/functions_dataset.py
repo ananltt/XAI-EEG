@@ -36,6 +36,7 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     event_type = event_matrix[:, 1]
 
     positions = []
+    ends = []
     labels = []
 
     # Find the samples at which the signal of interest starts (labeled as 768 and 1023 - if consider_artefacts =
@@ -44,15 +45,18 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     start_types = [768, 1023 if consider_artefacts is True else None]
 
     for l in range(len(event_type)):
-        if (event_type[l] in start_types) and event_type[l + 1] == 769:
+        if event_type[l] in start_types and event_type[l + 1] == 769:
             positions.append(l)
+            ends.append(l+1)
             labels.append(769)
 
-        if (event_type[l] in start_types) and event_type[l + 1] == 770:
+        if event_type[l] in start_types and event_type[l + 1] == 770:
             positions.append(l)
+            ends.append(l + 1)
             labels.append(770)
 
     event_start = event_position[positions]
+    event_end = event_position[ends]
 
     # Evaluate the samples  window
 
