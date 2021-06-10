@@ -261,6 +261,14 @@ def extractFBCSP(matrix, labels, n_features, fs=250):
 
 
 def wavelet_variation(signal, n_segments=8, seg_index=2):
+    """
+    Function to plot the signal, the signal obtained with zero ablation and the one obtained with linear 
+    interpolation and each respective approximation term of the Wavelet transformation.
+    
+    :param signal: signal to be processed
+    :param n_segment: number of segments in which the signal will be extracted
+    :param seg_index: index of the segment to which apply the ablation mechanism
+    """
 
     ca_all, cd_all = pywt.dwt(signal, 'db1')
 
