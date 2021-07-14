@@ -11,6 +11,7 @@ if __name__ == "__main__":
     data_dir = '../dataset/EEG'
 
     n_segments = 8          # number of segments considered in the signal
+    necessary_redimension = False
     n_features = 396        # number of features for FBCSP
     fs = 250                # sampling frequency
 
@@ -45,24 +46,28 @@ if __name__ == "__main__":
     # Common hyperparameters for the training
 
     batch_size = 32
-    num_epochs = 2
+    num_epochs = 50
 
     labels = np.array(labels)
 
-    iteractions = 3
-    for i in range(iteractions):
-        train_dataset, test_dataset, train_labels, test_labels = train_test_split(dataset, labels, train_size=0.7)
+    iterations = 200
+    for i in range(iterations):
+        print('Iteration: ', i)
+        
+        train_dataset, test_dataset, train_labels, test_labels = train_test_split(dataset, labels, train_size=0.8)
         wavelet_variation(train_dataset[0][0])
 
         train_wt = extract_wt(train_dataset)
         test_wt = extract_wt(test_dataset)
 
         # if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
-                                model_path='../models/EEGNet_wt')
+        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs, model_path='../models/EEGNet_wt')
         # else:
         #     model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
+        if necessary_redimension:
+          test_wt = np.expand_dims(test_wt, 3)
+        
         results = model.evaluate(test_wt, test_labels, verbose=0)
         tot_accuracies.append(results[1])
 
@@ -84,7 +89,8 @@ if __name__ == "__main__":
             lab = np.repeat([c], data.shape[0], axis=0)
 
             # Evaluate the model with the built dataset
-
+            
+            x = np.expand_dims(x, 3)
             results = model.evaluate(x, lab, verbose=0)
             accuracies = ablation(data, lab, model, extract_wt, n_segments)
 
@@ -99,7 +105,7 @@ if __name__ == "__main__":
                 interpolation_right_accuracies.append(list(accuracies[1]))
                 channel_right_accuracies.append(list(accuracies[2]))
 
-        permutation(test_dataset, test_labels, model, extract_wt, n_segments)
+        #permutation(test_dataset, test_labels, model, extract_wt, n_segments)
 
     save(tot_accuracies, "../output/tot_accuracies.csv")
     save(zero_accuracies, "../output/zero_accuracies.csv")

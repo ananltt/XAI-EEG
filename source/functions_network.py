@@ -21,11 +21,14 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
     """
 
     input_shape = (train_data[0].shape[0], train_data[0].shape[1])
+    
+    if necessary_redimension:
+      train_data = np.expand_dims(train_data, 3)
 
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
-    history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs, validation_split=0.3,
+    history = model.fit(x=train_data[:], y=train_labels[:], batch_size=batch_size, epochs=num_epochs, validation_split=0.2,
                         verbose=2)
 
     plot_model_training(history, model_path)
@@ -126,6 +129,8 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
             x = data
 
         # Evaluate the model with the built dataset
+        if necessary_redimension:
+          x = np.expand_dims(x, 3)
 
         results = model.evaluate(x, lab, verbose=0)
         print("\nTest loss, Test accuracy: ", results)
@@ -171,7 +176,9 @@ def ablation_zero_segments(dataset, labels, model, function_features=None, n_seg
             x = data
 
         # Evaluate difference of accuracy
-
+        if necessary_redimension:
+          x = np.expand_dims(x, 3)
+        
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
 
@@ -223,7 +230,8 @@ def ablation_linear_segments(dataset, labels, model, function_features=None, n_s
             x = data
 
         # Evaluate the difference of accuracies
-
+        if necessary_redimension:
+          x = np.expand_dims(x, 3)
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
 
@@ -263,7 +271,8 @@ def ablation_zero_channels(dataset, labels, model, function_features=None, n_cha
             x = data
 
         # Evaluate the difference of accuracies
-
+        if necessary_redimension:
+          x = np.expand_dims(x, 3)
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
 
@@ -291,6 +300,8 @@ def permutation(dataset, labels, model, function_features=None, n_segments=4, n_
     accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
     print("\nPermutation in the channels: \n", accuracies)
 
+
+# ATTENZIONE: SE SI ESEGUE, AGGIUNGERE x = np.expand_dims(x, 3)
 
 def permutation_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
     """
@@ -394,14 +405,14 @@ def save(matrix, output):
     with open(output, 'w') as f:
 
         for element in matrix:
-            if isinstance(element, float):
-                f.write("%f\n" % element)
+            if isinstance(element, (list, np.ndarray)):
+              for i in range(len(element)):
+                      if i == len(element)-1:
+                          f.write("%f" % element[i])
+                      else:
+                          f.write("%f," % element[i])
+              f.write('\n')
             else:
-                for i in range(len(element)):
-                    if i == len(element)-1:
-                        f.write("%f" % element[i])
-                    else:
-                        f.write("%f," % element[i])
-                f.write('\n')
-
+                f.write("%f\n" % element)
+                
     print("\t- Successfully saved in {}".format(output))
