@@ -1,19 +1,19 @@
 import copy
+import sys
+
 import numpy as np
 from EEGModels import EEGNet
 from matplotlib import pyplot as plt
 from functions_dataset import extract_indexes_segments
 
 
-def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, num_epochs, model_path):
+def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path):
     """
     Function for the training of an EEGNet. In general, have been used categorical_crossentropy as loss function, adam
     optimizer and accuracy as metric. The trained model is then saved and loss and accuracy are plotted.
 
     :param train_data: training dataset (n.trials x n.channels x n.samples)
     :param train_labels: training labels ([0, 1] for right hand, [1, 0] for left hand: n.trials x 2)
-    :param val_data: validation dataset
-    :param val_labels: validation labels
     :param batch_size: batch size for training
     :param num_epochs: number of epochs for training
     :param model_path: path and model name
@@ -25,8 +25,8 @@ def training_EEGNet(train_data, train_labels, val_data, val_labels, batch_size, 
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
-    history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs,
-                        validation_data=(val_data, val_labels), verbose=2)
+    history = model.fit(x=train_data, y=train_labels, batch_size=batch_size, epochs=num_epochs, validation_split=0.3,
+                        verbose=2)
 
     plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
@@ -77,14 +77,14 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     :param n_features: number of features to be extracted from FBCSP
     """
 
-    accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features)
-    print("\nAblation with zeros in the segments: \n", accuracies)
+    zero_accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features)
 
-    accuracies = ablation_linear_segments(dataset, labels, model, function_features, n_segments, n_features)
-    print("\nAblation with linearity in the segments: \n", accuracies)
+    interpolation_accuracies = ablation_linear_segments(dataset, labels, model, function_features, n_segments,
+                                                        n_features)
 
-    accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
-    print("\nAblation with zeros in the channels: \n", accuracies)
+    channel_accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
+
+    return zero_accuracies, interpolation_accuracies, channel_accuracies
 
 
 def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
@@ -388,3 +388,20 @@ def permutation_channels(dataset, labels, model, function_features=None, n_chann
         accuracies[k] = results[1]
 
     return accuracies
+
+
+def save(matrix, output):
+    with open(output, 'w') as f:
+
+        for element in matrix:
+            if isinstance(element, float):
+                f.write("%f\n" % element)
+            else:
+                for i in range(len(element)):
+                    if i == len(element)-1:
+                        f.write("%f" % element[i])
+                    else:
+                        f.write("%f," % element[i])
+                f.write('\n')
+
+    print("\t- Successfully saved in {}".format(output))

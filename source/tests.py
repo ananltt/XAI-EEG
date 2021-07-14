@@ -43,6 +43,45 @@ if __name__ == "__main__":
     val_steps = int(np.ceil(val_dataset.shape[0] / batch_size))
     test_steps = int(np.ceil(test_dataset.shape[0] / batch_size))
 
+    # USE OF EEGNET WITHOUT FEATURES
+
+    print("\nSIGNAL DATASET:\n")
+
+    if not os.path.exists('../models/EEGNet_signal.h5'):
+        model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
+                                '../models/EEGNet_signal')
+    else:
+        model = tf.keras.models.load_model('../models/EEGNet_signal.h5')
+
+    results = model.evaluate(test_dataset, test_labels, verbose=0)
+    print("\nTest loss, Test accuracy: ", results)
+
+    ablation(test_dataset, test_labels, model, n_segments=n_segments)
+    ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
+
+    permutation(test_dataset, test_labels, model, n_segments=n_segments)
+
+    # USE OF EEGNET WITH FBCSP
+
+    print("\nFBCSP DATASET:\n")
+
+    train_fbcsp = extractFBCSP(train_dataset, train_labels, n_features)
+    val_fbcsp = extractFBCSP(val_dataset, val_labels, n_features)
+    test_fbcsp = extractFBCSP(test_dataset, test_labels, n_features)
+
+    if not os.path.exists('../models/EEGNet_FBCSP.h5'):
+        model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
+                                '../models/EEGNet_FBCSP')
+    else:
+        model = tf.keras.models.load_model('../models/EEGNet_FBCSP.h5')
+
+    results = model.evaluate(test_fbcsp, test_labels, verbose=0)
+    print("\nTest loss, Test accuracy: ", results)
+
+    ablation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
+    # ablation_label_depending(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
+    permutation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
+
     # USE OF EEGNET WITH SC
 
     print("\nSTATISTICAL CHARACTERISTICS DATASET:\n")

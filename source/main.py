@@ -10,11 +10,15 @@ if __name__ == "__main__":
 
     data_dir = '../dataset/EEG'
 
-    n_segments = 8              # number of segments considered in the signal
-    n_features = 396            # number of features for FBCSP
-    fs = 250                    # sampling frequency
+    n_segments = 8  # number of segments considered in the signal
+    n_features = 396  # number of features for FBCSP
+    fs = 250  # sampling frequency
+    tot_accuracies = []
+    zero_accuracies = []
+    interpolation_accuracies = []
+    channel_accuracies = []
 
-    sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "w")  # TO WRITE ALL OUTPUT IN A FILE
+    # sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "w")  # TO WRITE ALL OUTPUT IN A FILE
 
     subjects = range(1, 10, 1)  # dataset composition
     dataset, labels = None, None
@@ -35,72 +39,36 @@ if __name__ == "__main__":
     num_epochs = 50
 
     labels = np.array(labels)
-    train_dataset, val_dataset, train_labels, val_labels = train_test_split(dataset, labels, train_size=0.7,
-                                                                            random_state=1)
-    val_dataset, test_dataset, val_labels, test_labels = train_test_split(val_dataset, val_labels, train_size=0.7,
-                                                                          random_state=1)
 
-    wavelet_variation(train_dataset[0][0])
+    iteractions = 100
+    for i in range(iteractions):
+        train_dataset, test_dataset, train_labels, test_labels = train_test_split(dataset, labels, train_size=0.7)
+        wavelet_variation(train_dataset[0][0])
 
-    # USE OF EEGNET WITHOUT FEATURES
+        train_wt = extract_wt(train_dataset)
+        test_wt = extract_wt(test_dataset)
 
-    print("\nSIGNAL DATASET:\n")
+        # if not os.path.exists('../models/EEGNet_wt.h5'):
+        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                                model_path='../models/EEGNet_wt')
+        # else:
+        #     model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
-    if not os.path.exists('../models/EEGNet_signal.h5'):
-        model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
-                                '../models/EEGNet_signal')
-    else:
-        model = tf.keras.models.load_model('../models/EEGNet_signal.h5')
+        results = model.evaluate(test_wt, test_labels, verbose=0)
+        tot_accuracies.append(results[1])
 
-    results = model.evaluate(test_dataset, test_labels, verbose=0)
-    print("\nTest loss, Test accuracy: ", results)
+        accuracies = ablation(test_dataset, test_labels, model, extract_wt, n_segments)
+        zero_accuracies.append(list(accuracies[0]))
+        interpolation_accuracies.append(accuracies[1])
+        channel_accuracies.append(accuracies[2])
 
-    ablation(test_dataset, test_labels, model, n_segments=n_segments)
-    ablation_label_depending(test_dataset, test_labels, model, n_segments=n_segments)
+        # ablation_label_depending(test_dataset, test_labels, model, extract_wt, n_segments)
+        #
+        # permutation(test_dataset, test_labels, model, extract_wt, n_segments)
 
-    permutation(test_dataset, test_labels, model, n_segments=n_segments)
+    # sys.stdout.close()
 
-    # USE OF EEGNET WITH WAVELET
-
-    print("\nWAVELET DATASET:\n")
-
-    train_wt = extract_wt(train_dataset)
-    val_wt = extract_wt(val_dataset)
-    test_wt = extract_wt(test_dataset)
-
-    if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, val_wt, val_labels, batch_size, num_epochs,
-                                '../models/EEGNet_wt')
-    else:
-        model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
-
-    results = model.evaluate(test_wt, test_labels, verbose=0)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_dataset, test_labels, model, extract_wt, n_segments)
-    ablation_label_depending(test_dataset, test_labels, model, extract_wt, n_segments)
-
-    permutation(test_dataset, test_labels, model, extract_wt, n_segments)
-
-    # USE OF EEGNET WITH FBCSP
-
-    print("\nFBCSP DATASET:\n")
-
-    train_fbcsp = extractFBCSP(train_dataset, train_labels, n_features)
-    val_fbcsp = extractFBCSP(val_dataset, val_labels, n_features)
-    test_fbcsp = extractFBCSP(test_dataset, test_labels, n_features)
-
-    if not os.path.exists('../models/EEGNet_FBCSP.h5'):
-        model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
-                                '../models/EEGNet_FBCSP')
-    else:
-        model = tf.keras.models.load_model('../models/EEGNet_FBCSP.h5')
-
-    results = model.evaluate(test_fbcsp, test_labels, verbose=0)
-    print("\nTest loss, Test accuracy: ", results)
-
-    ablation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
-    # ablation_label_depending(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
-    permutation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
-
-    sys.stdout.close()
+    save(tot_accuracies, "../output/tot_accuracies.csv")
+    save(zero_accuracies, "../output/zero_accuracies.csv")
+    save(interpolation_accuracies, "../output/interpolation_accuracies.csv")
+    save(channel_accuracies, "../output/channel_accuracies.csv")
