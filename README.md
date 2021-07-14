@@ -5,6 +5,19 @@
 
 University of Padua, Italy
 
+## Project execution
+
+1. Load the 2a dataset (BCI competition) inside the 'dataset' folder.
+
+2. Execute **dataloading.m** script: it requires the 2a dataset (of BCI competition) downloaded in 'dataset' folder; it extracts data and the correspondent labels in 'dataset/EEG' folder. To modify the path to the folder, it is necessary to change it at line 9 of the cited file. 
+
+3. Execute **main.py**: it loads properly the dataset and divides it into training, validation and test sets. It firstly trains the EEGNet and applies the ablation to the signal dataset, then applies the same procedure to wavelet and FBCSP datasets. 
+
+Finally, in test.py are reported some other networks tested for this project. 
+
+**NOTE**:
+If line 12 of main.py is not commented, all the standard output will be saved in the text file 'output/output.txt' and not shown with the standard visualization. 
+
 ## Project specification
 
 RESEARCH PURPOSE: To classify movements via EEG, and to explain what pieces of the input drive the model's classification decision.
@@ -21,21 +34,7 @@ TASKs:
 
 ## Project structure
 
-**NOTE:**
-For a correct execution of the project, it is necessary to insert the 2a dataset (BCI competition) inside the 'dataset' folder!
-
-**NOTE**:
-If line 12 of main.py is not commented, all the standard output will be saved in the text file 'output/output.txt' and not shown with the standard visualization. 
-
-All the source code is reported in 'source' folder.
-
-As first step, it is necessary to execute **dataloading.m** script: it requires the 2a dataset (of BCI competition) downloaded in 'dataset' folder; it extracts data and the correspondent labels in 'dataset/EEG' folder. To modify the path to the folder, it is necessary to change it at line 9 of the cited file. 
-
-As second step, it is necessary to execute **main.py**: it loads properly the dataset and divides it into training, validation and test sets. It firstly trains the EEGNet and applies the ablation to the signal dataset, then applies the same procedure to wavelet and FBCSP datasets. 
-
-All the implemented functions can be found in the 'source' folder. In particular, functions_dataset.py contains all the functions needed for the dataset creation and the feature extractions, functions_networks.py contains the functions for the network training, ablation and permutation mechanisms. FBCSP.py (https://github.com/jesus-333/FBCSP-Python) and EEGNet (https://github.com/vlawhern/arl-eegmodels) are classes already available on GitHub but here reported for the sake of convenience of the user. 
-
-Finally, in test.py are reported some other networks tested for this project. 
+All the source code is reported in 'source' folder. All the implemented functions can be found in the 'source' folder. In particular, functions_dataset.py contains all the functions needed for the dataset creation and the feature extractions, functions_networks.py contains the functions for the network training, ablation and permutation mechanisms. FBCSP.py (https://github.com/jesus-333/FBCSP-Python) and EEGNet (https://github.com/vlawhern/arl-eegmodels) are classes already available on GitHub but here reported for the sake of convenience of the user. 
 
 All the output will be saved in 'output' folder, while the models and the plots regarding the training procedures will be saved in the 'models' folder. 
 

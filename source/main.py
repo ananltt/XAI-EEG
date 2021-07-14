@@ -8,13 +8,13 @@ import os
 
 if __name__ == "__main__":
 
-    sys.stdout = open("../output/output.txt", "w")  # TO WRITE ALL OUTPUT IN A FILE
-
     data_dir = '../dataset/EEG'
 
     n_segments = 8              # number of segments considered in the signal
     n_features = 396            # number of features for FBCSP
     fs = 250                    # sampling frequency
+
+    sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "w")  # TO WRITE ALL OUTPUT IN A FILE
 
     subjects = range(1, 10, 1)  # dataset composition
     dataset, labels = None, None
@@ -99,8 +99,8 @@ if __name__ == "__main__":
     results = model.evaluate(test_fbcsp, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
 
-    # ablation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
+    ablation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
     # ablation_label_depending(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
-    # permutation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
+    permutation(test_dataset, test_labels, model, extractFBCSP, n_segments, n_features=n_features)
 
     sys.stdout.close()

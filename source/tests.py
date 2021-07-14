@@ -8,12 +8,12 @@ import os
 
 if __name__ == "__main__":
 
-    sys.stdout = open("../output/output_test.txt", "w")  # TO WRITE ALL OUTPUT IN A FILE
-
     data_dir = '../dataset/EEG'
     n_segments = 8              # number of segments considered in the signal
     n_features = 396            # number of features for FBCSP
     fs = 250                    # sampling frequency
+
+    sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "a")  # TO WRITE ALL OUTPUT IN A FILE
 
     subjects = range(1, 10, 1)  # dataset composition
     dataset, labels = None, None
