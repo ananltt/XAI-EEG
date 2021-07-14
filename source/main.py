@@ -105,7 +105,7 @@ if __name__ == "__main__":
                 interpolation_right_accuracies.append(list(accuracies[1]))
                 channel_right_accuracies.append(list(accuracies[2]))
 
-        #permutation(test_dataset, test_labels, model, extract_wt, n_segments)
+        # permutation(test_dataset, test_labels, model, extract_wt, n_segments)
 
     save(tot_accuracies, "../output/tot_accuracies.csv")
     save(zero_accuracies, "../output/zero_accuracies.csv")

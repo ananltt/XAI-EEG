@@ -1,4 +1,5 @@
 from glob import glob
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -24,8 +25,12 @@ if __name__ == "__main__":
         mean = np.mean(zero_accuracies, axis=1)
         std = np.std(zero_accuracies, axis=1)
 
+        name_ext = Path(path).name
+        name = name_ext.split('.')[0]
+
         fig, axs = plt.subplots()
         axs.set_title('Accuracy variability')
         axs.boxplot(zero_accuracies)
         plt.tight_layout()
+        plt.savefig('../output/variability/{}'.format(name))
         plt.show()
