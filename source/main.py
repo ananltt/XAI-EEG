@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
         accuracies = ablation(test_dataset, test_labels, model, extract_wt, n_segments)
         zero_accuracies.append(list(accuracies[0]))
-        interpolation_accuracies.append(accuracies[1])
-        channel_accuracies.append(accuracies[2])
+        interpolation_accuracies.append(list(accuracies[1]))
+        channel_accuracies.append(list(accuracies[2]))
 
         # ablation_label_depending(test_dataset, test_labels, model, extract_wt, n_segments)
         #
