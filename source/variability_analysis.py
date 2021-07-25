@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 
-if __name__ == "__main__":
 
-    output_folder = '../output/variability - 1000 iterations'
+def variability_analysis(output_folder):
 
     paths = glob(output_folder+'/zero_*.csv')
     paths = paths + glob(output_folder+'/interpolation_*.csv')

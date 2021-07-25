@@ -7,7 +7,7 @@ from sklearn.preprocessing import normalize
 from scipy.io import loadmat
 import numpy as np
 import pywt
-from FBCSP_V4 import FBCSP_V4
+from source.utilities.FBCSP_V4 import FBCSP_V4
 
 
 def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):

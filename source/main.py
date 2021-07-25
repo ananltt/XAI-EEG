@@ -1,32 +1,21 @@
-import sys
 from functions_dataset import *
 from functions_network import *
+from variability_analysis import *
 from sklearn.model_selection import train_test_split
 import numpy as np
-import tensorflow as tf
-import os
 
 if __name__ == "__main__":
 
-    data_dir = '../dataset/EEG'
+    data_folder = '../dataset/EEG'
+    output_folder = '../output/variability - 1000 iterations'
 
     n_segments = 8          # number of segments considered in the signal
     necessary_redimension = False
-    n_features = 396        # number of features for FBCSP
     fs = 250                # sampling frequency
 
-    tot_accuracies = []
-    zero_accuracies = []
-    interpolation_accuracies = []
-    channel_accuracies = []
-    tot_left_accuracies = []
-    zero_left_accuracies = []
-    interpolation_left_accuracies = []
-    channel_left_accuracies = []
-    tot_right_accuracies = []
-    zero_right_accuracies = []
-    interpolation_right_accuracies = []
-    channel_right_accuracies = []
+    tot_accuracies = [], zero_accuracies = [], interpolation_accuracies = [], channel_accuracies = []
+    tot_left_accuracies = [], zero_left_accuracies = [], interpolation_left_accuracies = [], channel_left_accuracies = []
+    tot_right_accuracies = [], zero_right_accuracies = [], interpolation_right_accuracies = [], channel_right_accuracies = []
 
     # sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "w")  # TO WRITE ALL OUTPUT IN A FILE
 
@@ -36,10 +25,10 @@ if __name__ == "__main__":
     for subject in subjects:
 
         if dataset is None:
-            dataset, labels = load_dataset(data_dir, subject, consider_artefacts=False)
+            dataset, labels = load_dataset(data_folder, subject, consider_artefacts=False)
 
         else:
-            d, l = load_dataset(data_dir, subject, consider_artefacts=False)
+            d, l = load_dataset(data_folder, subject, consider_artefacts=False)
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
             labels = np.concatenate((labels, np.array(l)), axis=0)
 
@@ -61,7 +50,8 @@ if __name__ == "__main__":
         test_wt = extract_wt(test_dataset)
 
         # if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs, model_path='../models/EEGNet_wt')
+        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                                model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
         # else:
         #     model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
@@ -92,7 +82,7 @@ if __name__ == "__main__":
             
             x = np.expand_dims(x, 3)
             results = model.evaluate(x, lab, verbose=0)
-            accuracies = ablation(data, lab, model, extract_wt, n_segments)
+            accuracies = ablation(data, lab, model, extract_wt, n_segments, necessary_redimension=necessary_redimension)
 
             if all((c == [1, 0])):
                 tot_left_accuracies.append(results[1])
@@ -107,17 +97,19 @@ if __name__ == "__main__":
 
         # permutation(test_dataset, test_labels, model, extract_wt, n_segments)
 
-    save(tot_accuracies, "../output/tot_accuracies.csv")
-    save(zero_accuracies, "../output/zero_accuracies.csv")
-    save(interpolation_accuracies, "../output/interpolation_accuracies.csv")
-    save(channel_accuracies, "../output/channel_accuracies.csv")
+    save(tot_accuracies, output_folder+"/tot_accuracies.csv")
+    save(zero_accuracies, output_folder+"/zero_accuracies.csv")
+    save(interpolation_accuracies, output_folder+"/interpolation_accuracies.csv")
+    save(channel_accuracies, output_folder+"/channel_accuracies.csv")
     
-    save(tot_left_accuracies, "../output/tot_left_accuracies.csv")
-    save(zero_left_accuracies, "../output/zero_left_accuracies.csv")
-    save(interpolation_left_accuracies, "../output/interpolation_left_accuracies.csv")
-    save(channel_left_accuracies, "../output/channel_left_accuracies.csv")
+    save(tot_left_accuracies, output_folder+"/tot_left_accuracies.csv")
+    save(zero_left_accuracies, output_folder+"/zero_left_accuracies.csv")
+    save(interpolation_left_accuracies, output_folder+"/interpolation_left_accuracies.csv")
+    save(channel_left_accuracies, output_folder+"/channel_left_accuracies.csv")
     
-    save(tot_right_accuracies, "../output/tot_right_accuracies.csv")
-    save(zero_right_accuracies, "../output/zero_right_accuracies.csv")
-    save(interpolation_right_accuracies, "../output/interpolation_right_accuracies.csv")
-    save(channel_right_accuracies, "../output/channel_right_accuracies.csv")
+    save(tot_right_accuracies, output_folder+"/tot_right_accuracies.csv")
+    save(zero_right_accuracies, output_folder+"/zero_right_accuracies.csv")
+    save(interpolation_right_accuracies, output_folder+"/interpolation_right_accuracies.csv")
+    save(channel_right_accuracies, output_folder+"/channel_right_accuracies.csv")
+
+    variability_analysis(output_folder=output_folder)

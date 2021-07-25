@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from functions_dataset import extract_indexes_segments
 
 
-def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path):
+def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path, necessary_redimension):
     """
     Function for the training of an EEGNet. In general, have been used categorical_crossentropy as loss function, adam
     optimizer and accuracy as metric. The trained model is then saved and loss and accuracy are plotted.
@@ -17,6 +17,7 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
     :param batch_size: batch size for training
     :param num_epochs: number of epochs for training
     :param model_path: path and model name
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: trained model
     """
 
@@ -66,7 +67,7 @@ def plot_model_training(history, model_name):
     plt.close()
 
 
-def ablation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396):
+def ablation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396, necessary_redimension=False):
     """
     Function to perform different types of ablation according to the XAI definition
 
@@ -80,18 +81,18 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     :param n_features: number of features to be extracted from FBCSP
     """
 
-    zero_accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features)
+    zero_accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
 
     interpolation_accuracies = ablation_linear_segments(dataset, labels, model, function_features, n_segments,
-                                                        n_features)
+                                                        n_features, necessary_redimension)
 
-    channel_accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
+    channel_accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
 
     return zero_accuracies, interpolation_accuracies, channel_accuracies
 
 
 def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
-                             n_features=396):
+                             n_features=396, necessary_redimension=False):
     """
     Function to perform ablation separately for each label present in the dataset
 
@@ -105,6 +106,7 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
     :param n_segments: number of segments to be evaluated with XAI
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     """
 
     # Extract the unique labels
@@ -139,7 +141,7 @@ def ablation_label_depending(dataset, labels, model, function_features=None, n_s
         ablation(data, lab, model, function_features, n_segments, n_channels, n_features)
 
 
-def ablation_zero_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
+def ablation_zero_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396, necessary_redimension=False):
     """
     Function to perform ablation setting at zero the segment of the signal under investigation
 
@@ -150,6 +152,7 @@ def ablation_zero_segments(dataset, labels, model, function_features=None, n_seg
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
@@ -185,7 +188,7 @@ def ablation_zero_segments(dataset, labels, model, function_features=None, n_seg
     return accuracies
 
 
-def ablation_linear_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
+def ablation_linear_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396, necessary_redimension=False):
     """
     Function to perform ablation setting the segment under investigation with a linear function
 
@@ -196,6 +199,7 @@ def ablation_linear_segments(dataset, labels, model, function_features=None, n_s
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
@@ -238,7 +242,7 @@ def ablation_linear_segments(dataset, labels, model, function_features=None, n_s
     return accuracies
 
 
-def ablation_zero_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396):
+def ablation_zero_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396, necessary_redimension=False):
     """
     Function to perform ablation setting the signal from the channel under investigation at zero
 

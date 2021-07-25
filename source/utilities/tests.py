@@ -8,7 +8,7 @@ import os
 
 if __name__ == "__main__":
 
-    data_dir = '../dataset/EEG'
+    data_dir = '../../dataset/EEG'
     n_segments = 8              # number of segments considered in the signal
     n_features = 396            # number of features for FBCSP
     fs = 250                    # sampling frequency
@@ -47,11 +47,11 @@ if __name__ == "__main__":
 
     print("\nSIGNAL DATASET:\n")
 
-    if not os.path.exists('../models/EEGNet_signal.h5'):
+    if not os.path.exists('../../models/EEGNet_signal.h5'):
         model = training_EEGNet(train_dataset, train_labels, val_dataset, val_labels, batch_size, num_epochs,
                                 '../models/EEGNet_signal')
     else:
-        model = tf.keras.models.load_model('../models/EEGNet_signal.h5')
+        model = tf.keras.models.load_model('../../models/EEGNet_signal.h5')
 
     results = model.evaluate(test_dataset, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
@@ -69,11 +69,11 @@ if __name__ == "__main__":
     val_fbcsp = extractFBCSP(val_dataset, val_labels, n_features)
     test_fbcsp = extractFBCSP(test_dataset, test_labels, n_features)
 
-    if not os.path.exists('../models/EEGNet_FBCSP.h5'):
+    if not os.path.exists('../../models/EEGNet_FBCSP.h5'):
         model = training_EEGNet(train_fbcsp, train_labels, val_fbcsp, val_labels, batch_size, num_epochs,
                                 '../models/EEGNet_FBCSP')
     else:
-        model = tf.keras.models.load_model('../models/EEGNet_FBCSP.h5')
+        model = tf.keras.models.load_model('../../models/EEGNet_FBCSP.h5')
 
     results = model.evaluate(test_fbcsp, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
@@ -90,11 +90,11 @@ if __name__ == "__main__":
     val_sc = extract_statistical_characteristics(val_dataset)
     test_sc = extract_statistical_characteristics(test_dataset)
 
-    if not os.path.exists('../models/EEGNet_sc.h5'):
+    if not os.path.exists('../../models/EEGNet_sc.h5'):
         model = training_EEGNet(train_sc, train_labels, val_sc, val_labels, batch_size, num_epochs,
                                 '../models/EEGNet_sc')
     else:
-        model = tf.keras.models.load_model('../models/EEGNet_sc.h5')
+        model = tf.keras.models.load_model('../../models/EEGNet_sc.h5')
 
     results = model.evaluate(test_sc, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
@@ -112,11 +112,11 @@ if __name__ == "__main__":
     val_psd = extract_psd(val_dataset)
     test_psd = extract_psd(test_dataset)
 
-    if not os.path.exists('../models/EEGNet_psd.h5'):
+    if not os.path.exists('../../models/EEGNet_psd.h5'):
         model = training_EEGNet(train_psd, train_labels, val_psd, val_labels, batch_size, num_epochs,
                                 '../models/EEGNet_psd')
     else:
-        model = tf.keras.models.load_model('../models/EEGNet_psd.h5')
+        model = tf.keras.models.load_model('../../models/EEGNet_psd.h5')
 
     results = model.evaluate(test_psd, test_labels, verbose=0)
     print("\nTest loss, Test accuracy: ", results)
