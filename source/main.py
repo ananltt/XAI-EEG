@@ -2,20 +2,22 @@ from functions_dataset import *
 from functions_network import *
 from variability_analysis import *
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 import numpy as np
 
 if __name__ == "__main__":
 
     data_folder = '../dataset/EEG'
     output_folder = '../output/variability - 1000 iterations'
-
     n_segments = 8          # number of segments considered in the signal
+    iterations = 1000       # number of iterations of the training for the variability analysis
+
     necessary_redimension = False
     fs = 250                # sampling frequency
 
-    tot_accuracies = [], zero_accuracies = [], interpolation_accuracies = [], channel_accuracies = []
-    tot_left_accuracies = [], zero_left_accuracies = [], interpolation_left_accuracies = [], channel_left_accuracies = []
-    tot_right_accuracies = [], zero_right_accuracies = [], interpolation_right_accuracies = [], channel_right_accuracies = []
+    tot_accuracies, zero_accuracies, interpolation_accuracies, channel_accuracies = [], [], [], []
+    tot_left_accuracies, zero_left_accuracies, interpolation_left_accuracies, channel_left_accuracies = [], [], [], []
+    tot_right_accuracies, zero_right_accuracies, interpolation_right_accuracies, channel_right_accuracies = [], [], [], []
 
     # sys.stdout = open("../output/output - {} segments.txt".format(n_segments), "w")  # TO WRITE ALL OUTPUT IN A FILE
 
@@ -39,7 +41,6 @@ if __name__ == "__main__":
 
     labels = np.array(labels)
 
-    iterations = 200
     for i in range(iterations):
         print('Iteration: ', i)
         
@@ -50,10 +51,10 @@ if __name__ == "__main__":
         test_wt = extract_wt(test_dataset)
 
         # if not os.path.exists('../models/EEGNet_wt.h5'):
-        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
-                                model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
+        # model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+        #                         model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
         # else:
-        #     model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
+        model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
         if necessary_redimension:
           test_wt = np.expand_dims(test_wt, 3)

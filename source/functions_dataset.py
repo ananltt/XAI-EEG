@@ -1,13 +1,11 @@
 import copy
 import scipy
-from matplotlib import pyplot as plt
 from scipy import signal
 from scipy.stats import entropy
 from sklearn.preprocessing import normalize
 from scipy.io import loadmat
-import numpy as np
 import pywt
-from source.utilities.FBCSP_V4 import FBCSP_V4
+from utilities.FBCSP_V4 import *
 
 
 def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
