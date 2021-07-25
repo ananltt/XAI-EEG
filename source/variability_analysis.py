@@ -7,9 +7,11 @@ import pandas
 
 if __name__ == "__main__":
 
-    paths = glob('../output/zero_*.csv')
-    paths = paths + glob('../output/interpolation_*.csv')
-    paths = paths + glob('../output/channel_*.csv')
+    output_folder = '../output/variability - 1000 iterations'
+
+    paths = glob(output_folder+'/zero_*.csv')
+    paths = paths + glob(output_folder+'/interpolation_*.csv')
+    paths = paths + glob(output_folder+'/channel_*.csv')
 
     for path in paths:
         # Read of the file as dataframe and initialization of the matrix
@@ -29,8 +31,8 @@ if __name__ == "__main__":
         name = name_ext.split('.')[0]
 
         fig, axs = plt.subplots()
-        axs.set_title('Accuracy variability')
+        axs.set_title('Accuracy variability: {}'.format(name))
         axs.boxplot(zero_accuracies)
         plt.tight_layout()
-        plt.savefig('../output/variability/{}'.format(name))
+        plt.savefig(output_folder+'/{}'.format(name))
         plt.show()
