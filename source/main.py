@@ -51,10 +51,10 @@ if __name__ == "__main__":
         test_wt = extract_wt(test_dataset)
 
         # if not os.path.exists('../models/EEGNet_wt.h5'):
-        # model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
-        #                         model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
+        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                                model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
         # else:
-        model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
+        # model = tf.keras.models.load_model('../models/EEGNet_wt.h5')
 
         if necessary_redimension:
           test_wt = np.expand_dims(test_wt, 3)
