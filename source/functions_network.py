@@ -2,7 +2,7 @@ import copy
 import sys
 
 import numpy as np
-from EEGModels import EEGNet
+from utilities.EEGModels import EEGNet
 from matplotlib import pyplot as plt
 from functions_dataset import extract_indexes_segments
 
