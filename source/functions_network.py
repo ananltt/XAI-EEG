@@ -79,6 +79,7 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     :param n_segments: number of segments to be evaluated with XAI
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted from FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     """
 
     zero_accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
@@ -89,56 +90,6 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     channel_accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
 
     return zero_accuracies, interpolation_accuracies, channel_accuracies
-
-
-def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
-                             n_features=396, necessary_redimension=False):
-    """
-    Function to perform ablation separately for each label present in the dataset
-
-    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
-    be without feature extraction)
-    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
-    be without feature extraction)
-    :param labels: labels corresponding to the dataset
-    :param model: model on which evaluate the ablation
-    :param function_features: function for the feature extraction of the dataset
-    :param n_segments: number of segments to be evaluated with XAI
-    :param n_channels: number of channels to be evaluated with XAI
-    :param n_features: number of features to be extracted with FBCSP
-    :param necessary_redimension: boolean to indicate if redimension is necessary
-    """
-
-    # Extract the unique labels
-
-    classes, indexes = np.unique(labels, return_inverse=True, axis=0)
-
-    for j, c in enumerate(classes):
-
-        print("\nConsidering labels {}".format(c))
-
-        # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
-
-        data = np.array([dataset[i] for i in range(len(indexes)) if indexes[i] == j])
-        lab = np.repeat([c], data.shape[0], axis=0)
-
-        if function_features is not None:
-            if function_features.__name__ == "extractFBCSP":
-                x = function_features(data, lab, n_features)
-            else:
-                x = function_features(data)
-        else:
-            x = data
-
-        # Evaluate the model with the built dataset
-        if necessary_redimension:
-          x = np.expand_dims(x, 3)
-
-        results = model.evaluate(x, lab, verbose=0)
-        print("\nTest loss, Test accuracy: ", results)
-
-        # Perform ablation with the built dataset
-        ablation(data, lab, model, function_features, n_segments, n_channels, n_features)
 
 
 def ablation_zero_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396, necessary_redimension=False):
@@ -180,7 +131,7 @@ def ablation_zero_segments(dataset, labels, model, function_features=None, n_seg
 
         # Evaluate difference of accuracy
         if necessary_redimension:
-          x = np.expand_dims(x, 3)
+            x = np.expand_dims(x, 3)
         
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
@@ -235,7 +186,7 @@ def ablation_linear_segments(dataset, labels, model, function_features=None, n_s
 
         # Evaluate the difference of accuracies
         if necessary_redimension:
-          x = np.expand_dims(x, 3)
+            x = np.expand_dims(x, 3)
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
 
@@ -253,6 +204,7 @@ def ablation_zero_channels(dataset, labels, model, function_features=None, n_cha
     :param function_features: function for the feature extraction of the dataset
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
@@ -283,8 +235,7 @@ def ablation_zero_channels(dataset, labels, model, function_features=None, n_cha
     return accuracies
 
 
-def permutation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
-                n_features=396):
+def permutation(dataset, labels, model, function_features=None, n_segments=4, n_channels=22, n_features=396, necessary_redimension=False):
     """
     Function to perform different types of permutation according to the XAI definition
 
@@ -296,18 +247,17 @@ def permutation(dataset, labels, model, function_features=None, n_segments=4, n_
     :param n_segments: number of segments to be evaluated with XAI
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     """
 
-    accuracies = permutation_segments(dataset, labels, model, function_features, n_segments, n_features)
-    print("\nPermutation in the segments: \n", accuracies)
+    accuracies_segments = permutation_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
 
-    accuracies = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features)
-    print("\nPermutation in the channels: \n", accuracies)
+    accuracies_channels = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
+
+    return accuracies_segments, accuracies_channels
 
 
-# ATTENZIONE: SE SI ESEGUE, AGGIUNGERE x = np.expand_dims(x, 3)
-
-def permutation_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396):
+def permutation_segments(dataset, labels, model, function_features=None, n_segments=4, n_features=396, necessary_redimension=False):
     """
     Function to perform permutation substituting a segment of a channel of a trial with the same segment of the same
     channel of another trial
@@ -319,6 +269,7 @@ def permutation_segments(dataset, labels, model, function_features=None, n_segme
     :param function_features: function for the feature extraction of the dataset
     :param n_segments: number of segments to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
@@ -354,6 +305,8 @@ def permutation_segments(dataset, labels, model, function_features=None, n_segme
             x = data
 
         # Evaluate the difference of accuracy
+        if necessary_redimension:
+            x = np.expand_dims(x, 3)
 
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
@@ -361,7 +314,7 @@ def permutation_segments(dataset, labels, model, function_features=None, n_segme
     return accuracies
 
 
-def permutation_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396):
+def permutation_channels(dataset, labels, model, function_features=None, n_channels=22, n_features=396, necessary_redimension=False):
     """
     Function to perform permutation substituting a channel with the same channel of another trial
 
@@ -372,6 +325,7 @@ def permutation_channels(dataset, labels, model, function_features=None, n_chann
     :param function_features: function for the feature extraction of the dataset
     :param n_channels: number of channels to be evaluated with XAI
     :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
     :return: each value of the array represents the accuracy obtained without the corresponding segment
     """
 
@@ -398,7 +352,8 @@ def permutation_channels(dataset, labels, model, function_features=None, n_chann
             x = data
 
         # Evaluate the difference of accuracies
-
+        if necessary_redimension:
+            x = np.expand_dims(x, 3)
         results = model.evaluate(x, labels, verbose=0)
         accuracies[k] = results[1]
 

@@ -1,0 +1,90 @@
+def ablation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_channels=22,
+                             n_features=396, necessary_redimension=False):
+    """
+    Function to perform ablation separately for each label present in the dataset
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should
+    be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
+    """
+
+    # Extract the unique labels
+    classes, indexes = np.unique(labels, return_inverse=True, axis=0)
+
+    for j, c in enumerate(classes):
+
+        print("\nConsidering labels {}".format(c))
+
+        # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
+
+        data = np.array([dataset[i] for i in range(len(indexes)) if indexes[i] == j])
+        lab = np.repeat([c], data.shape[0], axis=0)
+
+        if function_features is not None:
+            if function_features.__name__ == "extractFBCSP":
+                x = function_features(data, lab, n_features)
+            else:
+                x = function_features(data)
+        else:
+            x = data
+
+        # Evaluate the model with the built dataset
+        if necessary_redimension:
+            x = np.expand_dims(x, 3)
+
+        results = model.evaluate(x, lab, verbose=0)
+        print("\nTest loss, Test accuracy: ", results)
+
+        # Perform ablation with the built dataset
+        ablation(data, lab, model, function_features, n_segments, n_channels, n_features)
+
+
+def permutation_label_depending(dataset, labels, model, function_features=None, n_segments=4, n_features=396, n_channels=22, necessary_redimension=False):
+    """
+    Function to perform different types of permutation according to the XAI definition
+
+    :param dataset: dataset on which evaluate the ablation (if a feature dataset must be evaluated, this dataset should be without feature extraction)
+    :param labels: labels corresponding to the dataset
+    :param model: model on which evaluate the ablation
+    :param function_features: function for the feature extraction of the dataset
+    :param n_segments: number of segments to be evaluated with XAI
+    :param n_channels: number of channels to be evaluated with XAI
+    :param n_features: number of features to be extracted with FBCSP
+    :param necessary_redimension: boolean to indicate if redimension is necessary
+    """
+
+    # Extract the unique labels
+    classes, indexes = np.unique(labels, return_inverse=True, axis=0)
+
+    for j, c in enumerate(classes):
+
+        print("\nConsidering labels {}".format(c))
+
+        # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
+
+        data = np.array([dataset[i] for i in range(len(indexes)) if indexes[i] == j])
+        lab = np.repeat([c], data.shape[0], axis=0)
+
+        if function_features is not None:
+            if function_features.__name__ == "extractFBCSP":
+                x = function_features(data, lab, n_features)
+            else:
+                x = function_features(data)
+        else:
+            x = data
+
+        # Evaluate the model with the built dataset
+        if necessary_redimension:
+            x = np.expand_dims(x, 3)
+
+        results = model.evaluate(x, lab, verbose=0)
+        print("\nTest loss, Test accuracy: ", results)
+
+        # Perform ablation with the built dataset
+        permutation(data, lab, model, function_features, n_segments, n_channels, n_features)
