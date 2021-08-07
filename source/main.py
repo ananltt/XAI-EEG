@@ -48,11 +48,11 @@ if __name__ == "__main__":
 
     # Common hyperparameters for the training
     batch_size = 32
-    num_epochs = 2
+    num_epochs = 50
 
     # Repeat training and analysis for every iteration
     for i in range(iterations):
-        print('Iteration: ', i)
+        print('\n\tIteration: ', i)
 
         # Extraction of the different datasets
         train_dataset, test_dataset, train_labels, test_labels = train_test_split(dataset, labels, train_size=0.8)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
         for j, c in enumerate(classes):
 
-            print("\nConsidering labels {}".format(c))
+            print("Considering labels {}".format(c))
 
             # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
             data = np.array([test_dataset[i] for i in range(len(indexes)) if indexes[i] == j])

@@ -12,7 +12,7 @@
 #SBATCH -n 1
 #SBATCH -c 8
 #SBATCH -p allgroups
-#SBATCH -t 18:00:00
+#SBATCH -t 10-00:00:00
 #SBATCH --mem 20G
 
 # setup my personal/shared project folder

@@ -82,6 +82,7 @@ def ablation(dataset, labels, model, function_features=None, n_segments=4, n_cha
     :param necessary_redimension: boolean to indicate if redimension is necessary
     """
 
+    print("Applying ablation...")
     zero_accuracies = ablation_zero_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
 
     interpolation_accuracies = ablation_linear_segments(dataset, labels, model, function_features, n_segments,
@@ -250,6 +251,7 @@ def permutation(dataset, labels, model, function_features=None, n_segments=4, n_
     :param necessary_redimension: boolean to indicate if redimension is necessary
     """
 
+    print("Applying permutation...")
     accuracies_segments = permutation_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
 
     accuracies_channels = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
