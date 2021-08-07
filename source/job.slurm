@@ -6,7 +6,8 @@
 
 #SBATCH --mail-type ALL
 #SBATCH --mail-user giulia.pezzutti@studenti.unipd.it
-#SBATCH --mail-user anna.nalotto@studenti.unipd.it
+
+#SBATCH --gres=gpu:1
 
 #SBATCH -n 1
 #SBATCH -c 8
@@ -21,8 +22,8 @@ MY_DIR=/home/pezzuttigi/XAI-EEG/source/
 cd $MY_DIR
 
 # setup python3 environment for machine learning computations 
-source /nfsd/opt/anaconda3/anaconda3.sh 
-conda activate /nfsd/signet/hda_env
+source /nfsd/opt/anaconda3/anaconda3.sh
+conda activate /nfsd/signet/hda_env_gpu
 
 # run code
 srun python $MY_DIR/main.py

@@ -34,12 +34,15 @@ if __name__ == "__main__":
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
             labels = np.concatenate((labels, np.array(l)), axis=0)
 
+    labels = np.array(labels)
+
     # Common hyperparameters for the training
 
     batch_size = 32
     num_epochs = 50
 
-    labels = np.array(labels)
+    variability_analysis(output_folder=output_folder)
+    exit(1)
 
     for i in range(iterations):
         print('Iteration: ', i)
