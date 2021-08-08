@@ -285,23 +285,56 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     signal_linear[start:end] = np.linspace(signal_linear[start], signal_linear[end - 1], num=end - start)
     ca_linear, cd = pywt.dwt(signal_zero, 'sym9')
 
+    segments = [indexes[i][0] for i in range(len(indexes))]
+    segments.append(indexes[len(indexes)-1][1])
+
     # Plot results
     fig, axes = plt.subplots(3, 2)
     fig.tight_layout(h_pad=2)
 
     axes[0, 0].set_title("Signal")
+    for i in segments:
+        axes[0, 0].axvline(x=i, color='r', linestyle='--')
     axes[0, 0].plot(signal)
-    axes[0, 1].set_title("Signal Wavelet")
-    axes[0, 1].plot(ca_all)
+    axes[0, 0].set_ylim([-0.2, 0.2])
+    axes[0, 1].set_title("WT: Signal")
+    for i in segments:
+        axes[0, 1].axvline(x=i, color='r', linestyle='--')
+    axes[0, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[0, 1].twiny()
+    ax2.plot(ca_all)
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
 
     axes[1, 0].set_title("Zero-Ablation")
+    for i in segments:
+        axes[1, 0].axvline(x=i, color='r', linestyle='--')
     axes[1, 0].plot(signal_zero)
-    axes[1, 1].set_title("Zero-Ablation Wavelet")
-    axes[1, 1].plot(ca_zero)
+    axes[1, 0].set_ylim([-0.2, 0.2])
+    axes[1, 1].set_title("WT: Zero-Ablation")
+    for i in segments:
+        axes[1, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[1, 1].plot(ca_zero)
+    axes[1, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[1, 1].twiny()
+    ax2.plot(ca_zero)
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
 
     axes[2, 0].set_title("Interpolation-Ablation")
+    for i in segments:
+        axes[2, 0].axvline(x=i, color='r', linestyle='--')
     axes[2, 0].plot(signal_linear)
-    axes[2, 1].set_title("Interpolation-Ablation Wavelet")
-    axes[2, 1].plot(ca_linear)
+    axes[2, 0].set_ylim([-0.2, 0.2])
+    axes[2, 1].set_title("WT: Interpolation-Ablation")
+    for i in segments:
+        axes[2, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[2, 1].plot(ca_linear)
+    axes[2, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[2, 1].twiny()
+    ax2.plot(ca_linear)
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
+
     plt.savefig('../output/signal-wavelet.png', bbox_inches='tight')
     plt.show()
