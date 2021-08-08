@@ -1,4 +1,6 @@
 import copy
+
+import numpy as np
 import scipy
 from scipy import signal
 from scipy.stats import entropy
@@ -295,46 +297,152 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     axes[0, 0].set_title("Signal")
     for i in segments:
         axes[0, 0].axvline(x=i, color='r', linestyle='--')
-    axes[0, 0].plot(signal)
+    axes[0, 0].plot(range(0, start), signal[0:start], color='k')
+    axes[0, 0].plot(range(start, end), signal[start:end], color='g')
+    axes[0, 0].plot(range(end, len(signal)), signal[end:], color='k')
+    # axes[0, 0].set_xlim([0, 1000])
     axes[0, 0].set_ylim([-0.2, 0.2])
     axes[0, 1].set_title("WT: Signal")
     for i in segments:
         axes[0, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[0, 1].set_xlim([0, 1000])
     axes[0, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[0, 1].twiny()
-    ax2.plot(ca_all)
+    ax2.plot(range(0, int(start/2)+2), ca_all[0:int(start/2)+2], color='k')
+    ax2.plot(range(int(start/2)+2, int(end/2)), ca_all[int(start/2)+2:int(end/2)], color='g')
+    ax2.plot(range(int(end/2), int(len(ca_zero))), ca_all[int(end/2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
 
     axes[1, 0].set_title("Zero-Ablation")
     for i in segments:
         axes[1, 0].axvline(x=i, color='r', linestyle='--')
-    axes[1, 0].plot(signal_zero)
+    axes[1, 0].plot(range(0, start), signal_zero[0:start], color='k')
+    axes[1, 0].plot(range(start, end), signal_zero[start:end], color='g')
+    axes[1, 0].plot(range(end, len(signal)), signal_zero[end:], color='k')
+    # axes[1, 0].set_xlim([0, 1000])
     axes[1, 0].set_ylim([-0.2, 0.2])
     axes[1, 1].set_title("WT: Zero-Ablation")
     for i in segments:
         axes[1, 1].axvline(x=i, color='r', linestyle='--')
-    # axes[1, 1].plot(ca_zero)
+    # axes[1, 1].set_xlim([0, 1000])
     axes[1, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[1, 1].twiny()
-    ax2.plot(ca_zero)
+    ax2.plot(range(0, int(start/2)+2), ca_zero[0:int(start/2)+2], color='k')
+    ax2.plot(range(int(start/2)+2, int(end / 2)), ca_zero[int(start/2)+2:int(end / 2)], color='g')
+    ax2.plot(range(int(end / 2), int(len(ca_zero))), ca_zero[int(end / 2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
 
     axes[2, 0].set_title("Interpolation-Ablation")
     for i in segments:
         axes[2, 0].axvline(x=i, color='r', linestyle='--')
-    axes[2, 0].plot(signal_linear)
+    axes[2, 0].plot(range(0, start), signal_linear[0:start], color='k')
+    axes[2, 0].plot(range(start, end), signal_linear[start:end], color='g')
+    axes[2, 0].plot(range(end, len(signal)), signal_linear[end:], color='k')
+    # axes[2, 0].set_xlim([0, 1000])
     axes[2, 0].set_ylim([-0.2, 0.2])
     axes[2, 1].set_title("WT: Interpolation-Ablation")
     for i in segments:
         axes[2, 1].axvline(x=i, color='r', linestyle='--')
-    # axes[2, 1].plot(ca_linear)
+    # axes[2, 1].set_xlim([0, 1000])
     axes[2, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[2, 1].twiny()
-    ax2.plot(ca_linear)
+    ax2.plot(range(0, int(start/2)+2), ca_linear[0:int(start/2)+2], color='k')
+    ax2.plot(range(int(start/2)+2, int(end / 2)), ca_linear[int(start/2)+2:int(end / 2)], color='g')
+    ax2.plot(range(int(end / 2), int(len(ca_zero))), ca_linear[int(end / 2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
 
-    plt.savefig('../output/signal-wavelet.png', bbox_inches='tight')
+    plt.savefig('../output/signal-wavelet-ablation.png', bbox_inches='tight')
+    plt.show()
+    exit(1)
+
+
+def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
+
+    ca_all1, cd_all = pywt.dwt(signal1, 'sym9')
+    ca_all2, cd_all = pywt.dwt(signal2, 'sym9')
+
+    indexes = extract_indexes_segments(len(signal1), n_segments)
+    i = seg_index - 1
+    start, end = indexes[i]
+
+    new_signal = np.zeros(len(signal1))
+    for i in range(len(signal1)):
+        if start <= i < end:
+            new_signal[i] = signal2[i]
+        else:
+            new_signal[i] = signal1[i]
+
+    new_ca_all, cd_all = pywt.dwt(new_signal, 'sym9')
+
+    segments = [indexes[i][0] for i in range(len(indexes))]
+    segments.append(indexes[len(indexes) - 1][1])
+
+    # Plot results
+    fig, axes = plt.subplots(3, 2)
+    fig.tight_layout(h_pad=2)
+
+    axes[0, 0].set_title("Signal 1")
+    for i in segments:
+        axes[0, 0].axvline(x=i, color='r', linestyle='--')
+    axes[0, 0].plot(range(0, start), signal1[0:start], color='k')
+    axes[0, 0].plot(range(start, end), signal1[start:end], color='g')
+    axes[0, 0].plot(range(end, len(signal1)), signal1[end:], color='k')
+    # axes[0, 0].set_xlim([0, 1000])
+    axes[0, 0].set_ylim([-0.2, 0.2])
+    axes[0, 1].set_title("WT: Signal 1")
+    for i in segments:
+        axes[0, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[0, 1].set_xlim([0, 1000])
+    axes[0, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[0, 1].twiny()
+    ax2.plot(range(0, int(start / 2) + 2), ca_all1[0:int(start / 2) + 2], color='k')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all1[int(start / 2) + 2:int(end / 2)], color='g')
+    ax2.plot(range(int(end / 2), int(len(ca_all1))), ca_all1[int(end / 2):], color='k')
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
+
+    axes[1, 0].set_title("Signal 2")
+    for i in segments:
+        axes[1, 0].axvline(x=i, color='r', linestyle='--')
+    axes[1, 0].plot(range(0, start), signal2[0:start], color='b')
+    axes[1, 0].plot(range(start, end), signal2[start:end], color='c')
+    axes[1, 0].plot(range(end, len(signal2)), signal2[end:], color='b')
+    # axes[1, 0].set_xlim([0, 1000])
+    axes[1, 0].set_ylim([-0.2, 0.2])
+    axes[1, 1].set_title("WT: Signal 2")
+    for i in segments:
+        axes[1, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[1, 1].set_xlim([0, 1000])
+    axes[1, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[1, 1].twiny()
+    ax2.plot(range(0, int(start / 2) + 2), ca_all2[0:int(start / 2) + 2], color='b')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all2[int(start / 2) + 2:int(end / 2)], color='c')
+    ax2.plot(range(int(end / 2), int(len(ca_all2))), ca_all2[int(end / 2):], color='b')
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
+
+    axes[2, 0].set_title("Permutation")
+    for i in segments:
+        axes[2, 0].axvline(x=i, color='r', linestyle='--')
+    axes[2, 0].plot(range(0, start), new_signal[0:start], color='k')
+    axes[2, 0].plot(range(start, end), new_signal[start:end], color='c')
+    axes[2, 0].plot(range(end, len(new_signal)), new_signal[end:], color='k')
+    # axes[2, 0].set_xlim([0, 1000])
+    axes[2, 0].set_ylim([-0.2, 0.2])
+    axes[2, 1].set_title("WT: Permutation")
+    for i in segments:
+        axes[2, 1].axvline(x=i, color='r', linestyle='--')
+    # axes[2, 1].set_xlim([0, 1000])
+    axes[2, 1].set_ylim([-0.2, 0.2])
+    ax2 = axes[2, 1].twiny()
+    ax2.plot(range(0, int(start / 2) + 2), new_ca_all[0:int(start / 2) + 2], color='k')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), new_ca_all[int(start / 2) + 2:int(end / 2)], color='c')
+    ax2.plot(range(int(end / 2), int(len(new_ca_all))), new_ca_all[int(end / 2):], color='k')
+    ax2.set_xticklabels([])
+    ax2.set_axis_off()
+
+    plt.savefig('../output/signal-wavelet-permutation.png', bbox_inches='tight')
     plt.show()

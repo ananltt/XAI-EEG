@@ -56,7 +56,9 @@ if __name__ == "__main__":
 
         # Extraction of the different datasets
         train_dataset, test_dataset, train_labels, test_labels = train_test_split(dataset, labels, train_size=0.8)
+
         wavelet_variation(train_dataset[0][0])
+        permutation_visualization(train_dataset[0][0], train_dataset[1][0])
 
         train_wt = extract_wt(train_dataset)
         test_wt = extract_wt(test_dataset)
