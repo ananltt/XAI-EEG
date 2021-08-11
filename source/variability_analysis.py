@@ -19,10 +19,9 @@ def extract_accuracies_matrix(path):
 
 
 def variability_analysis(output_folder):
-
     print("\nVariability analysis!\n")
 
-    path = output_folder+'/tot_accuracies.csv'
+    path = output_folder + '/tot_accuracies.csv'
     accuracies = extract_accuracies_matrix(path)[0]
     baseline_both = np.mean(accuracies, axis=0)
     print("Baseline both labels: ", baseline_both)
@@ -37,9 +36,9 @@ def variability_analysis(output_folder):
     baseline_right = np.mean(accuracies, axis=0)
     print("Baseline left labels: ", baseline_right)
 
-    paths = glob(output_folder+'/zero_*.csv')
-    paths = paths + glob(output_folder+'/interpolation_*.csv')
-    paths = paths + glob(output_folder+'/channel_*.csv')
+    paths = glob(output_folder + '/zero_*.csv')
+    paths = paths + glob(output_folder + '/interpolation_*.csv')
+    paths = paths + glob(output_folder + '/channel_*.csv')
 
     for path in paths:
 
@@ -59,22 +58,22 @@ def variability_analysis(output_folder):
         else:
             b = baseline_both
 
-        difference = np.repeat(b, zero_accuracies.shape[0]*zero_accuracies.shape[1]).reshape(zero_accuracies.shape)
+        difference = np.repeat(b, zero_accuracies.shape[0] * zero_accuracies.shape[1]).reshape(zero_accuracies.shape)
         difference = np.subtract(difference, zero_accuracies)
         difference = difference * 100 / b
         mean_difference = np.mean(difference, axis=0)
 
-        print(mean_difference)
+        print(*mean_difference, sep=" & ")
 
         if name.find('channel') != -1:
-            labels = ['C'+str(i+1) for i in range(0, zero_accuracies.shape[1])]
+            labels = ['C' + str(i + 1) for i in range(0, zero_accuracies.shape[1])]
         else:
-            labels = ['S'+str(i+1) for i in range(0, zero_accuracies.shape[1])]
+            labels = ['S' + str(i + 1) for i in range(0, zero_accuracies.shape[1])]
 
         fig, axs = plt.subplots()
         axs.set_title('Accuracy variability: {}'.format(name))
         axs.boxplot(difference, labels=labels)
         axs.set_ylim([-100, 100])
         plt.tight_layout()
-        plt.savefig(output_folder+'/{}'.format(name))
+        plt.savefig(output_folder + '/{}'.format(name))
         plt.show()
