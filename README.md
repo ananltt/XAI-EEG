@@ -15,9 +15,6 @@ University of Padua, Italy
 
 Finally, in test.py are reported some other networks tested for this project. 
 
-**NOTE**:
-If line 12 of main.py is not commented, all the standard output will be saved in the text file 'output/output.txt' and not shown with the standard visualization. 
-
 ## Project specification
 
 RESEARCH PURPOSE: To classify movements via EEG, and to explain what pieces of the input drive the model's classification decision.
