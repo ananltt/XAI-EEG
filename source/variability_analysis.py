@@ -39,6 +39,7 @@ def variability_analysis(output_folder):
     paths = glob(output_folder + '/zero_*.csv')
     paths = paths + glob(output_folder + '/interpolation_*.csv')
     paths = paths + glob(output_folder + '/channel_*.csv')
+    paths = paths + glob(output_folder + '/permutation_*.csv')
 
     for path in paths:
 

@@ -254,7 +254,7 @@ def permutation(dataset, labels, model, function_features=None, n_segments=4, n_
     print("Applying permutation...")
     accuracies_segments = permutation_segments(dataset, labels, model, function_features, n_segments, n_features, necessary_redimension)
 
-    accuracies_channels = ablation_zero_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
+    accuracies_channels = permutation_channels(dataset, labels, model, function_features, n_channels, n_features, necessary_redimension)
 
     return accuracies_segments, accuracies_channels
 

@@ -356,7 +356,6 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
 
     plt.savefig('../output/signal-wavelet-ablation.png', bbox_inches='tight')
     plt.show()
-    exit(1)
 
 
 def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
