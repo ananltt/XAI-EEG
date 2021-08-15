@@ -144,3 +144,4 @@ if __name__ == "__main__":
 
     # Apply variability analysis
     variability_analysis(output_folder=output_folder)
+    print_channel_results(output_folder)
