@@ -143,5 +143,6 @@ if __name__ == "__main__":
     save(channel_right_accuracies_permutation, output_folder+"/permutation_channel_right_accuracies.csv")
 
     # Apply variability analysis
+    box_plot_tot_accuracies(output_folder=output_folder)
     variability_analysis(output_folder=output_folder)
-    print_channel_results(output_folder)
+    print_channel_results(output_folder=output_folder)

@@ -22,17 +22,17 @@ def variability_analysis(output_folder):
     print("\nVariability analysis ...\n")
 
     path = output_folder + '/tot_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_both = np.mean(accuracies, axis=0)
     print("Baseline both labels: ", baseline_both)
 
     path = output_folder + '/tot_left_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_left = np.mean(accuracies, axis=0)
     print("Baseline left labels: ", baseline_left)
 
     path = output_folder + '/tot_right_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_right = np.mean(accuracies, axis=0)
     print("Baseline right labels: ", baseline_right)
 
@@ -103,15 +103,15 @@ def variability_analysis(output_folder):
 def print_channel_results(output_folder):
     
     path = output_folder + '/tot_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_both = np.mean(accuracies, axis=0)
 
     path = output_folder + '/tot_left_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_left = np.mean(accuracies, axis=0)
 
     path = output_folder + '/tot_right_accuracies.csv'
-    accuracies = extract_accuracies_matrix(path)[0]
+    accuracies = extract_accuracies_matrix(path)[:, 0]
     baseline_right = np.mean(accuracies, axis=0)
     
     path1 = output_folder + '/permutation_channel_accuracies.csv'
@@ -152,3 +152,26 @@ def print_channel_results(output_folder):
     for i in range(len(mean_difference1)):
         print(labels[i], ' & ', mean_difference1[i], '\% & ', mean_difference2[i], '\% & ', mean_difference3[i], '\% \\\\')
         print('\hline')
+
+def box_plot_tot_accuracies(output_folder):
+
+    path = output_folder + '/tot_accuracies.csv'
+    accuracies = extract_accuracies_matrix(path)[:, 0]
+
+    path = output_folder + '/tot_left_accuracies.csv'
+    accuracies_left = extract_accuracies_matrix(path)[:, 0]
+
+    path = output_folder + '/tot_right_accuracies.csv'
+    accuracies_right = extract_accuracies_matrix(path)[:, 0]
+
+    accuracies = np.transpose(np.vstack((accuracies, accuracies_left, accuracies_right)))
+    labels = ['Test Both Hands', 'Test Left Hand', 'Test Right Hand']
+
+    title = 'Baseline Accuracy'
+    fig, axs = plt.subplots(figsize=(12, 8))
+    axs.set_title(title)
+    axs.boxplot(accuracies, labels=labels)
+    axs.set_ylim([-50, 100])
+    plt.tight_layout()
+    plt.savefig(output_folder + '/{}'.format(title))
+    plt.show()
