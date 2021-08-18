@@ -171,7 +171,7 @@ def box_plot_tot_accuracies(output_folder):
     fig, axs = plt.subplots(figsize=(12, 8))
     axs.set_title(title)
     axs.boxplot(accuracies, labels=labels)
-    axs.set_ylim([-50, 100])
+    axs.set_ylim([0, 1])
     plt.tight_layout()
     plt.savefig(output_folder + '/{}'.format(title))
     plt.show()
