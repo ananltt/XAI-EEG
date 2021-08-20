@@ -8,7 +8,7 @@ import numpy as np
 if __name__ == "__main__":
 
     data_folder = '../dataset/EEG'
-    output_folder = '../output/variability - 1000 iterations'
+    output_folder = '../output/variability - 1000 iterations - Wavelet CNN'
     n_segments = 8          # number of segments considered in the signal
     iterations = 1000       # number of iterations of the training for the variability analysis
 
@@ -64,8 +64,8 @@ if __name__ == "__main__":
         test_wt = extract_wt(test_dataset)
 
         # Network training
-        model = training_EEGNet(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
-                                model_path='../models/EEGNet_wt', necessary_redimension=necessary_redimension)
+        model = training_CNN(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                             model_path='../models/CNN_wt', necessary_redimension=necessary_redimension)
 
         # Network evaluation
         if necessary_redimension:

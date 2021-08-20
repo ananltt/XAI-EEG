@@ -2,10 +2,73 @@ import copy
 import sys
 
 import numpy as np
+from keras import Input
+from tensorflow.python.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, MaxPool2D, Flatten, Dense
+from tensorflow.python.keras.models import Model
+
 from utilities.EEGModels import EEGNet
 from matplotlib import pyplot as plt
 from functions_dataset import extract_indexes_segments
 
+
+def CNN(input_shape):
+    x_input = Input(input_shape, name='input')
+
+    # Layer with 64x64 Conv2D
+    x = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), data_format='channels_last', use_bias=True,
+               padding='same', name='conv64')(x_input)
+    x = BatchNormalization(axis=-1, name='bn64')(x)
+    x = Activation('relu')(x)
+    x = Dropout(rate=0.2)(x)
+
+    # Layer with 128x128 Conv2D
+    x = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), data_format='channels_last', use_bias=True,
+               padding='same', name='conv128')(x)
+    x = BatchNormalization(axis=-1, name='bn128')(x)
+    x = Activation('relu')(x)
+    x = Dropout(rate=0.2)(x)
+
+    # Layer with 256x256 Conv2D
+    x = Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), data_format='channels_last', use_bias=True,
+               padding='same', name='conv256')(x)
+    x = BatchNormalization(axis=-1, name='bn256')(x)
+    x = Activation('relu')(x)
+    x = Dropout(rate=0.2)(x)
+
+    # Layer with 512x512 Conv2D
+    x = Conv2D(filters=512, kernel_size=(3, 3), strides=(1, 1), data_format='channels_last', use_bias=True,
+               padding='same', name='conv512')(x)
+    x = BatchNormalization(axis=-1, name='bn512')(x)
+    x = Activation('relu')(x)
+    x = Dropout(rate=0.2)(x)
+
+    x = MaxPool2D(pool_size=2)(x)
+    x = Flatten()(x)
+    x = Dense(2, activation='sigmoid', name='fully-connected')(x)
+
+    model = Model(inputs=x_input, outputs=x)
+    model.summary()
+
+    return model
+
+
+def training_CNN(train_data, train_labels, batch_size, num_epochs, model_path, necessary_redimension):
+    input_shape = (train_data[0].shape[0], train_data[0].shape[1])
+
+    if necessary_redimension:
+        train_data = np.expand_dims(train_data, 3)
+
+    model = CNN(input_shape)
+    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+
+    history = model.fit(x=train_data[:], y=train_labels[:], batch_size=batch_size, epochs=num_epochs,
+                        validation_split=0.2,
+                        verbose=2)
+
+    plot_model_training(history, model_path)
+    model.save('{}.h5'.format(model_path))
+
+    return model
 
 def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path, necessary_redimension):
     """

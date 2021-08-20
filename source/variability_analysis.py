@@ -49,9 +49,6 @@ def variability_analysis(output_folder):
 
         zero_accuracies = extract_accuracies_matrix(path)
 
-        mean = np.mean(zero_accuracies, axis=1)
-        std = np.std(zero_accuracies, axis=1)
-
         if name.find('left') != -1:
             b = baseline_left
             title = 'Test Left Hand - '
@@ -69,7 +66,12 @@ def variability_analysis(output_folder):
         for i, val in enumerate(mean_difference):
             mean_difference[i] = round(val, 3)
 
-        print(*mean_difference, sep="\% & ")
+        std = np.std(difference, axis=0)
+
+        print('mean: ', mean_difference)
+        print('std: ', std)
+
+        # print(*mean_difference, sep="\% & ")
 
         dict_channels = {'C1': 'FZ', 'C2': 'FC3', 'C3': 'FC1', 'C4': 'FCz', 'C5': 'FC2',
                          'C6': 'FC4', 'C7': 'C5', 'C8': 'C3', 'C9': 'C1', 'C10': 'CZ', 'C11': 'C2', 'C12': 'C4',
