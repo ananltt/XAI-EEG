@@ -15,40 +15,36 @@ def CNN(input_shape):
     input_shape = (input_shape[0], input_shape[1], 1)
     x_input = Input(input_shape, name='input')
 
-    # Layer with 64x64 Conv2D
     x = Conv2D(filters=64, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
                padding='same', name='conv64')(x_input)
     x = BatchNormalization(axis=-1, name='bn64')(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(rate=0.2)(x)
 
-    # Layer with 128x128 Conv2D
     x = Conv2D(filters=128, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
                padding='same', name='conv128')(x)
     x = BatchNormalization(axis=-1, name='bn128')(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(rate=0.2)(x)
 
-    # Layer with 256x256 Conv2D
     x = Conv2D(filters=256, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
                padding='same', name='conv256')(x)
     x = BatchNormalization(axis=-1, name='bn256')(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(rate=0.2)(x)
 
-    # Layer with 512x512 Conv2D
-    x = Conv2D(filters=512, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-               padding='same', name='conv512')(x)
-    x = BatchNormalization(axis=-1, name='bn512')(x)
-    x = Activation('relu')(x)
-    x = Dropout(rate=0.2)(x)
-    
-    # Layer with 1024x1024 Conv2D
-    x = Conv2D(filters=1024, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-               padding='same', name='conv1024')(x)
-    x = BatchNormalization(axis=-1, name='bn1024')(x)
-    x = Activation('relu')(x)
-    x = Dropout(rate=0.2)(x)
+    # x = Conv2D(filters=512, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
+    #            padding='same', name='conv512')(x)
+    # x = BatchNormalization(axis=-1, name='bn512')(x)
+    # x = Activation('elu')(x)
+    # x = Dropout(rate=0.2)(x)
+    #
+    # # Layer with 1024x1024 Conv2D
+    # x = Conv2D(filters=1024, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
+    #            padding='same', name='conv1024')(x)
+    # x = BatchNormalization(axis=-1, name='bn1024')(x)
+    # x = Activation('relu')(x)
+    # x = Dropout(rate=0.2)(x)
 
     # x = MaxPool1D(pool_size=2)(x)
     x = Flatten()(x)
