@@ -7,7 +7,7 @@
 #SBATCH --mail-type ALL
 #SBATCH --mail-user giulia.pezzutti@studenti.unipd.it
 
-#SBATCH --gres=gpu:1
+# #SBATCH --gres=gpu:1
 
 #SBATCH -n 1
 #SBATCH -c 8

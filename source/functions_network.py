@@ -91,6 +91,8 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
     :return: trained model
     """
 
+    train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, train_size=0.8)
+
     input_shape = (train_data[0].shape[0], train_data[0].shape[1])
     
     if necessary_redimension:
@@ -99,8 +101,8 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
     model = EEGNet(nb_classes=2, Chans=input_shape[0], Samples=input_shape[1])
     model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
 
-    history = model.fit(x=train_data[:], y=train_labels[:], batch_size=batch_size, epochs=num_epochs, validation_split=0.2,
-                        verbose=2)
+    history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
+                        batch_size=batch_size, epochs=num_epochs, verbose=2)
 
     plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
