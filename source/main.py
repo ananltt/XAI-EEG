@@ -91,13 +91,13 @@ if __name__ == "__main__":
         else:
             function = None
 
-        accuracies = ablation(test_dataset_proc, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
+        accuracies = ablation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
         zero_accuracies.append(list(accuracies[0]))
         interpolation_accuracies.append(list(accuracies[1]))
         channel_accuracies.append(list(accuracies[2]))
 
         # Permutation application
-        accuracies = permutation(test_dataset_proc, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
+        accuracies = permutation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
         accuracies_permutation.append(list(accuracies[0]))
         channel_accuracies_permutation.append(list(accuracies[1]))
 
