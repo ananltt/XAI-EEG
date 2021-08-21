@@ -9,8 +9,11 @@ if __name__ == "__main__":
 
     data_folder = '../dataset/EEG'
     output_folder = '../output/variability - 1000 iterations - Wavelet CNN'
+
     n_segments = 8          # number of segments considered in the signal
     iterations = 1000       # number of iterations of the training for the variability analysis
+    eegnet = False          # if perform eegnet training or cnn training
+    wavelet = False          # if use the wavelet transform or not
 
     necessary_redimension = False
     fs = 250                # sampling frequency
@@ -60,28 +63,41 @@ if __name__ == "__main__":
         wavelet_variation(train_dataset[0][0])
         permutation_visualization(train_dataset[0][0], train_dataset[1][0])
 
-        train_wt = extract_wt(train_dataset)
-        test_wt = extract_wt(test_dataset)
+        if wavelet:
+            train_dataset_proc = extract_wt(train_dataset)
+            test_dataset_proc = extract_wt(test_dataset)
+        else:
+            train_dataset_proc = train_dataset
+            test_dataset_proc = test_dataset
 
         # Network training
-        model = training_CNN(train_wt, train_labels, batch_size=batch_size, num_epochs=num_epochs,
-                             model_path='../models/CNN_wt', necessary_redimension=necessary_redimension)
+        if eegnet:
+            model = training_EEGNet(train_dataset_proc, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                                    model_path='../models/model', necessary_redimension=necessary_redimension)
+        else:
+            model = training_CNN(train_dataset_proc, train_labels, batch_size=batch_size, num_epochs=num_epochs,
+                                 model_path='../models/model', necessary_redimension=necessary_redimension)
 
         # Network evaluation
         if necessary_redimension:
-            test_wt = np.expand_dims(test_wt, 3)
+            test_dataset_proc = np.expand_dims(test_dataset_proc, 3)
 
-        results = model.evaluate(test_wt, test_labels, verbose=0)
+        results = model.evaluate(test_dataset_proc, test_labels, verbose=0)
         tot_accuracies.append(results[1])
 
         # Ablation application
-        accuracies = ablation(test_dataset, test_labels, model, extract_wt, n_segments, necessary_redimension=necessary_redimension)
+        if wavelet:
+            function = extract_wt
+        else:
+            function = None
+
+        accuracies = ablation(test_dataset_proc, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
         zero_accuracies.append(list(accuracies[0]))
         interpolation_accuracies.append(list(accuracies[1]))
         channel_accuracies.append(list(accuracies[2]))
 
         # Permutation application
-        accuracies = permutation(test_dataset, test_labels, model, extract_wt, n_segments, necessary_redimension=necessary_redimension)
+        accuracies = permutation(test_dataset_proc, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
         accuracies_permutation.append(list(accuracies[0]))
         channel_accuracies_permutation.append(list(accuracies[1]))
 
@@ -94,14 +110,21 @@ if __name__ == "__main__":
 
             # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
             data = np.array([test_dataset[i] for i in range(len(indexes)) if indexes[i] == j])
-            x = extract_wt(data)
+
+            if wavelet:
+                x = extract_wt(data)
+            else:
+                x = data
+
             lab = np.repeat([c], data.shape[0], axis=0)
 
             # Evaluate the model with the built dataset with ablation and permutation
-            x = np.expand_dims(x, 3)
+            if necessary_redimension:
+                x = np.expand_dims(x, 3)
             results = model.evaluate(x, lab, verbose=0)
-            accuracies_ab = ablation(data, lab, model, extract_wt, n_segments, necessary_redimension=necessary_redimension)
-            accuracies_pe = permutation(data, lab, model, extract_wt, n_segments, necessary_redimension=necessary_redimension)
+
+            accuracies_ab = ablation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
+            accuracies_pe = permutation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
 
             # Save the results according to the label
             if all((c == [1, 0])):
