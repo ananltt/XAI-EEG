@@ -50,7 +50,7 @@ if __name__ == "__main__":
     labels = np.array(labels)
 
     # Common hyperparameters for the training
-    batch_size = 32
+    batch_size = 16
     num_epochs = 50
 
     # Repeat training and analysis for every iteration

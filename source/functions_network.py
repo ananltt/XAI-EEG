@@ -2,9 +2,10 @@ import copy
 import sys
 
 import numpy as np
+import tensorflow.keras.regularizers
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, MaxPool1D, Flatten, Dense
+from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, MaxPool1D, Flatten, Dense, DepthwiseConv2D
 
 from utilities.EEGModels import EEGNet
 from matplotlib import pyplot as plt
@@ -15,40 +16,26 @@ def CNN(input_shape):
     input_shape = (input_shape[0], input_shape[1], 1)
     x_input = Input(input_shape, name='input')
 
-    x = Conv2D(filters=64, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-               padding='same', name='conv64')(x_input)
+    x = Conv2D(filters=64, kernel_size=(1, 9), strides=(1, 1), use_bias=True, padding='same', name='conv64')(x_input)
     x = BatchNormalization(axis=-1, name='bn64')(x)
     x = Activation('elu')(x)
     x = Dropout(rate=0.2)(x)
 
-    x = Conv2D(filters=128, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-               padding='same', name='conv128')(x)
-    x = BatchNormalization(axis=-1, name='bn128')(x)
-    x = Activation('elu')(x)
-    x = Dropout(rate=0.2)(x)
-
-    x = Conv2D(filters=256, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-               padding='same', name='conv256')(x)
-    x = BatchNormalization(axis=-1, name='bn256')(x)
-    x = Activation('elu')(x)
-    x = Dropout(rate=0.2)(x)
-
-    # x = Conv2D(filters=512, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-    #            padding='same', name='conv512')(x)
-    # x = BatchNormalization(axis=-1, name='bn512')(x)
+    # x = Conv2D(filters=64, kernel_size=(22, 1), strides=(1, 1), use_bias=True, padding='same', name='conv128')(x)
+    # x = BatchNormalization(axis=-1, name='bn128')(x)
     # x = Activation('elu')(x)
     # x = Dropout(rate=0.2)(x)
-    #
-    # # Layer with 1024x1024 Conv2D
-    # x = Conv2D(filters=1024, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-    #            padding='same', name='conv1024')(x)
-    # x = BatchNormalization(axis=-1, name='bn1024')(x)
-    # x = Activation('relu')(x)
+
+    # x = Conv2D(filters=256, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
+    #            padding='same', name='conv256')(x)
+    # x = BatchNormalization(axis=-1, name='bn256')(x)
+    # x = Activation('elu')(x)
     # x = Dropout(rate=0.2)(x)
 
     # x = MaxPool1D(pool_size=2)(x)
     x = Flatten()(x)
-    x = Dense(2, activation='sigmoid', name='fully-connected')(x)
+    # x = Dense(64, activation='relu', name='fully-connected2', kernel_regularizer=tensorflow.keras.regularizers.L1())(x)
+    x = Dense(2, activation='softmax', name='fully-connected')(x)
 
     model = Model(inputs=x_input, outputs=x)
     model.summary()
