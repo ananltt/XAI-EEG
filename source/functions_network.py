@@ -4,8 +4,7 @@ import sys
 import numpy as np
 import tensorflow.keras.regularizers
 from sklearn.model_selection import train_test_split
-from tensorflow.keras import Input, Model
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Dropout, MaxPool1D, Flatten, Dense, DepthwiseConv2D
+import tensorflow as tf
 
 from utilities.EEGModels import EEGNet
 from matplotlib import pyplot as plt
@@ -13,41 +12,61 @@ from functions_dataset import extract_indexes_segments
 
 
 def CNN(input_shape):
-    input_shape = (input_shape[0], input_shape[1], 1)
-    x_input = Input(input_shape, name='input')
 
-    x = Conv2D(filters=64, kernel_size=(1, 9), strides=(1, 1), use_bias=True, padding='same', name='conv64')(x_input)
-    x = BatchNormalization(axis=-1, name='bn64')(x)
-    x = Activation('elu')(x)
-    x = Dropout(rate=0.2)(x)
+    X_input = tf.keras.Input(input_shape)
 
-    # x = Conv2D(filters=64, kernel_size=(22, 1), strides=(1, 1), use_bias=True, padding='same', name='conv128')(x)
-    # x = BatchNormalization(axis=-1, name='bn128')(x)
-    # x = Activation('elu')(x)
-    # x = Dropout(rate=0.2)(x)
+    X = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv0')(X_input)
+    X = tf.keras.layers.BatchNormalization(axis=-1, name='bn0')(X)
+    X = tf.keras.layers.Activation('relu')(X)
+    X = tf.keras.layers.Dropout(rate=0.2)(X)
 
-    # x = Conv2D(filters=256, kernel_size=3, strides=1, data_format='channels_last', use_bias=True,
-    #            padding='same', name='conv256')(x)
-    # x = BatchNormalization(axis=-1, name='bn256')(x)
-    # x = Activation('elu')(x)
-    # x = Dropout(rate=0.2)(x)
+    X = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv1')(X)
+    X = tf.keras.layers.BatchNormalization(axis=-1, name='bn1')(X)
+    X = tf.keras.layers.Activation('relu')(X)
+    X = tf.keras.layers.Dropout(rate=0.2)(X)
 
-    # x = MaxPool1D(pool_size=2)(x)
-    x = Flatten()(x)
-    # x = Dense(64, activation='relu', name='fully-connected2', kernel_regularizer=tensorflow.keras.regularizers.L1())(x)
-    x = Dense(2, activation='softmax', name='fully-connected')(x)
+    X = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv2')(X)
+    X = tf.keras.layers.BatchNormalization(axis=-1, name='bn2')(X)
+    X = tf.keras.layers.Activation('relu')(X)
+    X = tf.keras.layers.Dropout(rate=0.2)(X)
 
-    model = Model(inputs=x_input, outputs=x)
-    model.summary()
+    X = tf.keras.layers.MaxPool2D(pool_size=2)(X)
+
+    X = tf.keras.layers.Flatten()(X)
+    X = tf.keras.layers.Dense(2, activation='softmax', name='fc')(X)
+
+    model = tf.keras.Model(inputs=X_input, outputs=X)
 
     return model
 
 
-def training_CNN(train_data, train_labels, batch_size, num_epochs, model_path, necessary_redimension):
+def DNN_model_2labels(trained_model):
+
+    model = tf.keras.models.Sequential()
+    for layer in trained_model.layers[:-1]:
+        model.add(layer)
+    for layer in model.layers:
+        layer.trainable = False
+    model.add(tf.keras.layers.Dense(units=256, activation='relu', name='fc0',
+                                    kernel_regularizer=tf.keras.regularizers.l1(0.0001)))
+    model.add(tf.keras.layers.Dense(units=128, activation='relu', name='fc1',
+                                    kernel_regularizer=tf.keras.regularizers.l1(0.0001)))
+    model.add(tf.keras.layers.Dense(units=64, activation='relu', name='fc2',
+                                    kernel_regularizer=tf.keras.regularizers.l1(0.0001)))
+    model.add(tf.keras.layers.Dense(units=2, activation='sigmoid', name='fc3'))
+
+    model.build()
+    return model
+
+
+def training_CNN(train_data, train_labels, scale, batch_size, num_epochs, model_path, necessary_redimension):
 
     train_data, val_data, train_labels, val_labels = train_test_split(train_data, train_labels, train_size=0.8)
 
-    input_shape = (train_data[0].shape[0], train_data[0].shape[1])
+    if scale:
+        input_shape = (train_data[0].shape[0], train_data[0].shape[1], train_data[0].shape[2])
+    else:
+        input_shape = (train_data[0].shape[0], train_data[0].shape[1], 1)
 
     if necessary_redimension:
         train_data = np.expand_dims(train_data, 3)
@@ -58,8 +77,17 @@ def training_CNN(train_data, train_labels, batch_size, num_epochs, model_path, n
     history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
                         batch_size=batch_size, epochs=num_epochs, verbose=2)
 
-    plot_model_training(history, model_path)
+    # plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
+
+    model = DNN_model_2labels(model)
+    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+
+    history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
+                        batch_size=batch_size, epochs=num_epochs, verbose=2)
+
+    # plot_model_training(history, model_path)
+    model.save('{}_DNN.h5'.format(model_path))
 
     return model
 

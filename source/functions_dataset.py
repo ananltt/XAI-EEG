@@ -1,21 +1,33 @@
 import copy
-
+from scipy.signal import medfilt
+import scipy
 import numpy as np
 import scipy
 from scipy import signal
 from scipy.stats import entropy
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import normalize, scale
 from scipy.io import loadmat
 import pywt
 from utilities.FBCSP_V4 import *
 
 
-def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
+def bandpassfilter(sig, lowcut, highcut, fs, order=5):
+
+    # Pass band filtering for a digital signal
+
+    [b, a] = scipy.signal.butter(order, [lowcut, highcut], btype='bandpass', fs=fs, analog=False)
+    y = scipy.signal.filtfilt(b, a, sig, axis=0)
+
+    return np.array(y)
+
+
+def load_dataset(data_dir, subject, bands, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
     """
     Function for the loading of the dataset corresponding to a subject (and saved according to dataloading.m)
 
     :param data_dir: directory where data are saved
     :param subject: index of the current subject
+    :param bands
     :param fs: sampling frequency of the signal
     :param start_second: second at which consider the start of the signal of interest
     :param signal_length: length of the signal of interest
@@ -66,11 +78,37 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
 
     # Creation of the trials matrix and data normalization
 
-    trials = np.zeros((len(event_start), data.shape[1], len(windows_sample)))
-    data = data.T
+    if bands:
 
-    for j in range(trials.shape[0]):
-        trials[j, :, :] = normalize(data[:, event_start[j] + windows_sample], axis=1)
+        trials = np.zeros((len(event_start), data.shape[1], len(windows_sample), 5))
+        data = data.T
+
+        for j in range(trials.shape[0]):
+            current_data = data[:, event_start[j] + windows_sample]
+
+            filtered_data = np.zeros([current_data.shape[0], current_data.shape[1], 5])
+            for i in range(current_data.shape[0]):
+                filtered_data[i, :, 0] = bandpassfilter(current_data[i, :], 0.5, 4.0, 250)
+                filtered_data[i, :, 1] = bandpassfilter(current_data[i, :], 4.0, 8.0, 250)
+                filtered_data[i, :, 2] = bandpassfilter(current_data[i, :], 8.0, 12.0, 250)
+                filtered_data[i, :, 3] = bandpassfilter(current_data[i, :], 13.0, 30.0, 250)
+                filtered_data[i, :, 3] = bandpassfilter(current_data[i, :], 30.0, 60.0, 250)
+
+            data_scaled = np.zeros(filtered_data.shape)
+            for i in range(filtered_data.shape[2]):
+                for k in range(filtered_data.shape[0]):
+                    data_scaled[k, :, i] = scale(filtered_data[k, :, i])
+
+            trials[j, :, :, :] = data_scaled
+
+    else:
+
+        trials = np.zeros((len(event_start), data.shape[1], len(windows_sample)))
+        data = data.T
+
+        for j in range(trials.shape[0]):
+            current_data = data[:, event_start[j] + windows_sample]
+            trials[j, :, :] = scale(current_data)
 
     # Creation of the label list
 
