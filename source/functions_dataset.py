@@ -97,7 +97,7 @@ def load_dataset(data_dir, subject, bands, fs=250, start_second=2, signal_length
             data_scaled = np.zeros(filtered_data.shape)
             for i in range(filtered_data.shape[2]):
                 for k in range(filtered_data.shape[0]):
-                    data_scaled[k, :, i] = scale(filtered_data[k, :, i])
+                    data_scaled[k, :, i] = normalize(scale(filtered_data[k, :, i]).reshape(1, -1), axis=1)
 
             trials[j, :, :, :] = data_scaled
 

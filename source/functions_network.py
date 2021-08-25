@@ -15,35 +15,35 @@ def CNN(input_shape):
 
     X_input = tf.keras.Input(input_shape)
 
-    X = tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv0')(X_input)
+    X = tf.keras.layers.Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv0', kernel_regularizer=tf.keras.regularizers.l1(0.01))(X_input)
     X = tf.keras.layers.BatchNormalization(axis=-1, name='bn0')(X)
     X = tf.keras.layers.Activation('relu')(X)
     X = tf.keras.layers.Dropout(rate=0.2)(X)
 
-    X = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv1')(X)
-    X = tf.keras.layers.BatchNormalization(axis=-1, name='bn1')(X)
-    X = tf.keras.layers.Activation('relu')(X)
-    X = tf.keras.layers.Dropout(rate=0.2)(X)
-
-    X = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv2')(X)
-    X = tf.keras.layers.BatchNormalization(axis=-1, name='bn2')(X)
-    X = tf.keras.layers.Activation('relu')(X)
-    X = tf.keras.layers.Dropout(rate=0.2)(X)
+    # X = tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv1')(X)
+    # X = tf.keras.layers.BatchNormalization(axis=-1, name='bn1')(X)
+    # X = tf.keras.layers.Activation('relu')(X)
+    # X = tf.keras.layers.Dropout(rate=0.2)(X)
+    #
+    # X = tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv2')(X)
+    # X = tf.keras.layers.BatchNormalization(axis=-1, name='bn2')(X)
+    # X = tf.keras.layers.Activation('relu')(X)
+    # X = tf.keras.layers.Dropout(rate=0.2)(X)
 
     X = tf.keras.layers.MaxPool2D(pool_size=2)(X)
 
     X = tf.keras.layers.Flatten()(X)
-    X = tf.keras.layers.Dense(2, activation='softmax', name='fc')(X)
+    X = tf.keras.layers.Dense(2, activation='softmax', name='fc', kernel_regularizer=tf.keras.regularizers.l1(0.01))(X)
 
     model = tf.keras.Model(inputs=X_input, outputs=X)
 
     return model
 
 
-def DNN_model_2labels(trained_model):
+def DNN_model_2labels(trained_model, to_be_removed=1):
 
     model = tf.keras.models.Sequential()
-    for layer in trained_model.layers[:-1]:
+    for layer in trained_model.layers[:(-to_be_removed)]:
         model.add(layer)
     for layer in model.layers:
         layer.trainable = False
@@ -121,6 +121,15 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
 
     plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
+
+    model = DNN_model_2labels(model, 2)
+    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
+
+    history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
+                        batch_size=batch_size, epochs=num_epochs, verbose=2)
+
+    # plot_model_training(history, model_path)
+    model.save('{}_DNN.h5'.format(model_path))
 
     return model
 

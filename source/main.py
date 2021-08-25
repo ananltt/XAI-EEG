@@ -12,9 +12,9 @@ if __name__ == "__main__":
 
     n_segments = 8          # number of segments considered in the signal
     iterations = 1000       # number of iterations of the training for the variability analysis
-    eegnet = False          # if perform eegnet training or cnn training
-    wavelet = False          # if use the wavelet transform or not
-    bands = True            # perform division in bands or not
+    eegnet = True          # if perform eegnet training or cnn training
+    wavelet = True          # if use the wavelet transform or not
+    bands = False            # perform division in bands or not
 
     necessary_redimension = False
     fs = 250                # sampling frequency
@@ -86,62 +86,62 @@ if __name__ == "__main__":
         print('\n\t Test accuracy: ', results[1])
         tot_accuracies.append(results[1])
 
-        # # Ablation application
-        # if wavelet:
-        #     function = extract_wt
-        # else:
-        #     function = None
-        #
-        # accuracies = ablation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
-        # zero_accuracies.append(list(accuracies[0]))
-        # interpolation_accuracies.append(list(accuracies[1]))
-        # channel_accuracies.append(list(accuracies[2]))
-        #
-        # # Permutation application
-        # accuracies = permutation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
-        # accuracies_permutation.append(list(accuracies[0]))
-        # channel_accuracies_permutation.append(list(accuracies[1]))
-        #
-        # # Division of the dataset according to unique labels
-        # classes, indexes = np.unique(test_labels, return_inverse=True, axis=0)
-        #
-        # for j, c in enumerate(classes):
-        #
-        #     print("Considering labels {}".format(c))
-        #
-        #     # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
-        #     data = np.array([test_dataset[i] for i in range(len(indexes)) if indexes[i] == j])
-        #
-        #     if wavelet:
-        #         x = extract_wt(data)
-        #     else:
-        #         x = data
-        #
-        #     lab = np.repeat([c], data.shape[0], axis=0)
-        #
-        #     # Evaluate the model with the built dataset with ablation and permutation
-        #     if necessary_redimension:
-        #         x = np.expand_dims(x, 3)
-        #     results = model.evaluate(x, lab, verbose=0)
-        #
-        #     accuracies_ab = ablation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
-        #     accuracies_pe = permutation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
-        #
-        #     # Save the results according to the label
-        #     if all((c == [1, 0])):
-        #         tot_left_accuracies.append(results[1])
-        #         zero_left_accuracies.append(list(accuracies_ab[0]))
-        #         interpolation_left_accuracies.append(list(accuracies_ab[1]))
-        #         channel_left_accuracies.append(list(accuracies_ab[2]))
-        #         left_accuracies_permutation.append(list(accuracies_pe[0]))
-        #         channel_left_accuracies_permutation.append(list(accuracies_pe[1]))
-        #     else:
-        #         tot_right_accuracies.append(results[1])
-        #         zero_right_accuracies.append(list(accuracies_ab[0]))
-        #         interpolation_right_accuracies.append(list(accuracies_ab[1]))
-        #         channel_right_accuracies.append(list(accuracies_ab[2]))
-        #         right_accuracies_permutation.append(list(accuracies_pe[0]))
-        #         channel_right_accuracies_permutation.append(list(accuracies_pe[1]))
+        # Ablation application
+        if wavelet:
+            function = extract_wt
+        else:
+            function = None
+
+        accuracies = ablation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
+        zero_accuracies.append(list(accuracies[0]))
+        interpolation_accuracies.append(list(accuracies[1]))
+        channel_accuracies.append(list(accuracies[2]))
+
+        # Permutation application
+        accuracies = permutation(test_dataset, test_labels, model, function, n_segments, necessary_redimension=necessary_redimension)
+        accuracies_permutation.append(list(accuracies[0]))
+        channel_accuracies_permutation.append(list(accuracies[1]))
+
+        # Division of the dataset according to unique labels
+        classes, indexes = np.unique(test_labels, return_inverse=True, axis=0)
+
+        for j, c in enumerate(classes):
+
+            print("Considering labels {}".format(c))
+
+            # Build the dataset corresponding to each label, in case applying the feature extractor algorithm
+            data = np.array([test_dataset[i] for i in range(len(indexes)) if indexes[i] == j])
+
+            if wavelet:
+                x = extract_wt(data)
+            else:
+                x = data
+
+            lab = np.repeat([c], data.shape[0], axis=0)
+
+            # Evaluate the model with the built dataset with ablation and permutation
+            if necessary_redimension:
+                x = np.expand_dims(x, 3)
+            results = model.evaluate(x, lab, verbose=0)
+
+            accuracies_ab = ablation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
+            accuracies_pe = permutation(data, lab, model, function, n_segments, necessary_redimension=necessary_redimension)
+
+            # Save the results according to the label
+            if all((c == [1, 0])):
+                tot_left_accuracies.append(results[1])
+                zero_left_accuracies.append(list(accuracies_ab[0]))
+                interpolation_left_accuracies.append(list(accuracies_ab[1]))
+                channel_left_accuracies.append(list(accuracies_ab[2]))
+                left_accuracies_permutation.append(list(accuracies_pe[0]))
+                channel_left_accuracies_permutation.append(list(accuracies_pe[1]))
+            else:
+                tot_right_accuracies.append(results[1])
+                zero_right_accuracies.append(list(accuracies_ab[0]))
+                interpolation_right_accuracies.append(list(accuracies_ab[1]))
+                channel_right_accuracies.append(list(accuracies_ab[2]))
+                right_accuracies_permutation.append(list(accuracies_pe[0]))
+                channel_right_accuracies_permutation.append(list(accuracies_pe[1]))
 
     # Save output in different files
     save(tot_accuracies, output_folder+"/tot_accuracies.csv")
