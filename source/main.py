@@ -8,15 +8,14 @@ import numpy as np
 if __name__ == "__main__":
 
     data_folder = '../dataset/EEG'
-    output_folder = '../output/variability - 1000 iterations - signal bands CNN'
+    output_folder = '../output/variability - 1000 iterations - signal CNN'
 
-    n_segments = 8          # number of segments considered in the signal
+    n_segments = 4          # number of segments considered in the signal
     iterations = 1000       # number of iterations of the training for the variability analysis
-    eegnet = True          # if perform eegnet training or cnn training
+    eegnet = True           # if perform eegnet training or cnn training
     wavelet = True          # if use the wavelet transform or not
-    bands = False            # perform division in bands or not
 
-    necessary_redimension = False
+    necessary_redimension = True
     fs = 250                # sampling frequency
 
     # Accuracies obtained with the entire test set
@@ -41,10 +40,10 @@ if __name__ == "__main__":
     for subject in subjects:
 
         if dataset is None:
-            dataset, labels = load_dataset(data_folder, subject, bands, consider_artefacts=False)
+            dataset, labels = load_dataset(data_folder, subject, consider_artefacts=False)
 
         else:
-            d, l = load_dataset(data_folder, subject, bands, consider_artefacts=False)
+            d, l = load_dataset(data_folder, subject, consider_artefacts=False)
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
             labels = np.concatenate((labels, np.array(l)), axis=0)
 

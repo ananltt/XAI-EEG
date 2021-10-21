@@ -12,7 +12,6 @@ from utilities.FBCSP_V4 import *
 
 
 def bandpassfilter(sig, lowcut, highcut, fs, order=5):
-
     # Pass band filtering for a digital signal
 
     [b, a] = scipy.signal.butter(order, [lowcut, highcut], btype='bandpass', fs=fs, analog=False)
@@ -21,13 +20,12 @@ def bandpassfilter(sig, lowcut, highcut, fs, order=5):
     return np.array(y)
 
 
-def load_dataset(data_dir, subject, bands, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
+def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
     """
     Function for the loading of the dataset corresponding to a subject (and saved according to dataloading.m)
 
     :param data_dir: directory where data are saved
     :param subject: index of the current subject
-    :param bands
     :param fs: sampling frequency of the signal
     :param start_second: second at which consider the start of the signal of interest
     :param signal_length: length of the signal of interest
@@ -59,7 +57,7 @@ def load_dataset(data_dir, subject, bands, fs=250, start_second=2, signal_length
     for l in range(len(event_type)):
         if event_type[l] in start_types and event_type[l + 1] == 769:
             positions.append(l)
-            ends.append(l+1)
+            ends.append(l + 1)
             labels.append(769)
 
         if event_type[l] in start_types and event_type[l + 1] == 770:
@@ -78,37 +76,12 @@ def load_dataset(data_dir, subject, bands, fs=250, start_second=2, signal_length
 
     # Creation of the trials matrix and data normalization
 
-    if bands:
+    trials = np.zeros((len(event_start), data.shape[1], len(windows_sample)))
+    data = data.T
 
-        trials = np.zeros((len(event_start), data.shape[1], len(windows_sample), 5))
-        data = data.T
-
-        for j in range(trials.shape[0]):
-            current_data = data[:, event_start[j] + windows_sample]
-
-            filtered_data = np.zeros([current_data.shape[0], current_data.shape[1], 5])
-            for i in range(current_data.shape[0]):
-                filtered_data[i, :, 0] = bandpassfilter(current_data[i, :], 0.5, 4.0, 250)
-                filtered_data[i, :, 1] = bandpassfilter(current_data[i, :], 4.0, 8.0, 250)
-                filtered_data[i, :, 2] = bandpassfilter(current_data[i, :], 8.0, 12.0, 250)
-                filtered_data[i, :, 3] = bandpassfilter(current_data[i, :], 13.0, 30.0, 250)
-                filtered_data[i, :, 3] = bandpassfilter(current_data[i, :], 30.0, 60.0, 250)
-
-            data_scaled = np.zeros(filtered_data.shape)
-            for i in range(filtered_data.shape[2]):
-                for k in range(filtered_data.shape[0]):
-                    data_scaled[k, :, i] = normalize(scale(filtered_data[k, :, i]).reshape(1, -1), axis=1)
-
-            trials[j, :, :, :] = data_scaled
-
-    else:
-
-        trials = np.zeros((len(event_start), data.shape[1], len(windows_sample)))
-        data = data.T
-
-        for j in range(trials.shape[0]):
-            current_data = data[:, event_start[j] + windows_sample]
-            trials[j, :, :] = scale(current_data)
+    for j in range(trials.shape[0]):
+        current_data = data[:, event_start[j] + windows_sample]
+        trials[j, :, :] = scale(current_data)
 
     # Creation of the label list
 
@@ -191,7 +164,6 @@ def extract_wt(matrix):
         approx = []
 
         for channel in trial:
-
             # For the signals coming from each channel, extract the corresponding wavelet decomposition
 
             ca, _ = pywt.dwt(channel, 'sym9')
@@ -219,7 +191,6 @@ def extract_psd(matrix, fs=250):
         trial = np.matrix(trial)
 
         for i in range(trial.shape[0]):
-
             # For the signals coming from each channel, extract the corresponding psd
 
             data = trial[i, :]
@@ -243,7 +214,6 @@ def extract_statistical_characteristics(matrix):
         trial = np.matrix(trial)
 
         for i in range(trial.shape[0]):
-
             # For the signals coming from each channel, extract the corresponding statistical characteristics
 
             data = trial[i, :]
@@ -254,9 +224,9 @@ def extract_statistical_characteristics(matrix):
             sc_dataset[t, i, 3] = sc.skewness
             sc_dataset[t, i, 4] = sc.kurtosis
             sc_dataset[t, i, 5] = entropy(data, axis=1)
-            sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)      # area under the (rectified) curve
-            sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)    # number of zero-crossing
-            sc_dataset[t, i, 8] = np.max(data) - np.min(data)           # peak-to-peak
+            sc_dataset[t, i, 6] = np.trapz(np.array(data), axis=1)  # area under the (rectified) curve
+            sc_dataset[t, i, 7] = len(data) - np.count_nonzero(data)  # number of zero-crossing
+            sc_dataset[t, i, 8] = np.max(data) - np.min(data)  # peak-to-peak
             sc_dataset[t, i, 9] = 0
 
         sc_dataset[t, :, 10:] = np.corrcoef(trial)  # Pearson Correlation Coefficients between channels
@@ -326,7 +296,7 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     ca_linear, cd = pywt.dwt(signal_zero, 'sym9')
 
     segments = [indexes[i][0] for i in range(len(indexes))]
-    segments.append(indexes[len(indexes)-1][1])
+    segments.append(indexes[len(indexes) - 1][1])
 
     # Plot results
     fig, axes = plt.subplots(3, 2)
@@ -346,9 +316,9 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     # axes[0, 1].set_xlim([0, 1000])
     axes[0, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[0, 1].twiny()
-    ax2.plot(range(0, int(start/2)+2), ca_all[0:int(start/2)+2], color='k')
-    ax2.plot(range(int(start/2)+2, int(end/2)), ca_all[int(start/2)+2:int(end/2)], color='g')
-    ax2.plot(range(int(end/2), int(len(ca_zero))), ca_all[int(end/2):], color='k')
+    ax2.plot(range(0, int(start / 2) + 2), ca_all[0:int(start / 2) + 2], color='k')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all[int(start / 2) + 2:int(end / 2)], color='g')
+    ax2.plot(range(int(end / 2), int(len(ca_zero))), ca_all[int(end / 2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
 
@@ -366,8 +336,8 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     # axes[1, 1].set_xlim([0, 1000])
     axes[1, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[1, 1].twiny()
-    ax2.plot(range(0, int(start/2)+2), ca_zero[0:int(start/2)+2], color='k')
-    ax2.plot(range(int(start/2)+2, int(end / 2)), ca_zero[int(start/2)+2:int(end / 2)], color='g')
+    ax2.plot(range(0, int(start / 2) + 2), ca_zero[0:int(start / 2) + 2], color='k')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_zero[int(start / 2) + 2:int(end / 2)], color='g')
     ax2.plot(range(int(end / 2), int(len(ca_zero))), ca_zero[int(end / 2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
@@ -386,8 +356,8 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     # axes[2, 1].set_xlim([0, 1000])
     axes[2, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[2, 1].twiny()
-    ax2.plot(range(0, int(start/2)+2), ca_linear[0:int(start/2)+2], color='k')
-    ax2.plot(range(int(start/2)+2, int(end / 2)), ca_linear[int(start/2)+2:int(end / 2)], color='g')
+    ax2.plot(range(0, int(start / 2) + 2), ca_linear[0:int(start / 2) + 2], color='k')
+    ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_linear[int(start / 2) + 2:int(end / 2)], color='g')
     ax2.plot(range(int(end / 2), int(len(ca_zero))), ca_linear[int(end / 2):], color='k')
     ax2.set_xticklabels([])
     ax2.set_axis_off()
@@ -397,7 +367,6 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
 
 
 def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
-
     ca_all1, cd_all = pywt.dwt(signal1, 'sym9')
     ca_all2, cd_all = pywt.dwt(signal2, 'sym9')
 
