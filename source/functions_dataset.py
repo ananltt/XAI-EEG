@@ -80,8 +80,7 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     data = data.T
 
     for j in range(trials.shape[0]):
-        current_data = data[:, event_start[j] + windows_sample]
-        trials[j, :, :] = scale(current_data)
+        trials[j, :, :] = normalize(data[:, event_start[j] + windows_sample], axis=1)
 
     # Creation of the label list
 
@@ -275,7 +274,7 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     """
     Function to plot the signal, the signal obtained with zero ablation and the one obtained with linear 
     interpolation and each respective approximation term of the Wavelet transformation.
-    
+
     :param signal: signal to be processed
     :param n_segments: number of segments in which the signal will be extracted
     :param seg_index: index of the segment to which apply the ablation mechanism
@@ -298,13 +297,6 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     segments = [indexes[i][0] for i in range(len(indexes))]
     segments.append(indexes[len(indexes) - 1][1])
 
-    # print(signal)
-    # plt.plot(signal)
-    # plt.show()
-    # plt.plot(signal[0:start])
-    # plt.show()
-    # exit(1)
-
     # Plot results
     fig, axes = plt.subplots(3, 2)
     fig.tight_layout(h_pad=2)
@@ -316,12 +308,12 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     axes[0, 0].plot(range(start, end), signal[start:end], color='g')
     axes[0, 0].plot(range(end, len(signal)), signal[end:], color='k')
     # axes[0, 0].set_xlim([0, 1000])
-    # axes[0, 0].set_ylim([-0.2, 0.2])
+    axes[0, 0].set_ylim([-0.2, 0.2])
     axes[0, 1].set_title("WT: Signal")
     for i in segments:
         axes[0, 1].axvline(x=i, color='r', linestyle='--')
     # axes[0, 1].set_xlim([0, 1000])
-    axes[0, 1].set_ylim([-3, 3])
+    axes[0, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[0, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), ca_all[0:int(start / 2) + 2], color='k')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all[int(start / 2) + 2:int(end / 2)], color='g')
@@ -336,12 +328,12 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     axes[1, 0].plot(range(start, end), signal_zero[start:end], color='g')
     axes[1, 0].plot(range(end, len(signal)), signal_zero[end:], color='k')
     # axes[1, 0].set_xlim([0, 1000])
-    # axes[1, 0].set_ylim([-3, 3])
+    axes[1, 0].set_ylim([-0.2, 0.2])
     axes[1, 1].set_title("WT: Zero-Ablation")
     for i in segments:
         axes[1, 1].axvline(x=i, color='r', linestyle='--')
     # axes[1, 1].set_xlim([0, 1000])
-    axes[1, 1].set_ylim([-3, 3])
+    axes[1, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[1, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), ca_zero[0:int(start / 2) + 2], color='k')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_zero[int(start / 2) + 2:int(end / 2)], color='g')
@@ -356,12 +348,12 @@ def wavelet_variation(signal, n_segments=8, seg_index=2):
     axes[2, 0].plot(range(start, end), signal_linear[start:end], color='g')
     axes[2, 0].plot(range(end, len(signal)), signal_linear[end:], color='k')
     # axes[2, 0].set_xlim([0, 1000])
-    # axes[2, 0].set_ylim([-0.2, 0.2])
+    axes[2, 0].set_ylim([-0.2, 0.2])
     axes[2, 1].set_title("WT: Interpolation-Ablation")
     for i in segments:
         axes[2, 1].axvline(x=i, color='r', linestyle='--')
     # axes[2, 1].set_xlim([0, 1000])
-    axes[2, 1].set_ylim([-3, 3])
+    axes[2, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[2, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), ca_linear[0:int(start / 2) + 2], color='k')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_linear[int(start / 2) + 2:int(end / 2)], color='g')
@@ -404,12 +396,12 @@ def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
     axes[0, 0].plot(range(start, end), signal1[start:end], color='g')
     axes[0, 0].plot(range(end, len(signal1)), signal1[end:], color='k')
     # axes[0, 0].set_xlim([0, 1000])
-    # axes[0, 0].set_ylim([-0.2, 0.2])
+    axes[0, 0].set_ylim([-0.2, 0.2])
     axes[0, 1].set_title("WT: Signal 1")
     for i in segments:
         axes[0, 1].axvline(x=i, color='r', linestyle='--')
     # axes[0, 1].set_xlim([0, 1000])
-    axes[0, 1].set_ylim([-3, 3])
+    axes[0, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[0, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), ca_all1[0:int(start / 2) + 2], color='k')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all1[int(start / 2) + 2:int(end / 2)], color='g')
@@ -424,12 +416,12 @@ def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
     axes[1, 0].plot(range(start, end), signal2[start:end], color='c')
     axes[1, 0].plot(range(end, len(signal2)), signal2[end:], color='b')
     # axes[1, 0].set_xlim([0, 1000])
-    # axes[1, 0].set_ylim([-0.2, 0.2])
+    axes[1, 0].set_ylim([-0.2, 0.2])
     axes[1, 1].set_title("WT: Signal 2")
     for i in segments:
         axes[1, 1].axvline(x=i, color='r', linestyle='--')
     # axes[1, 1].set_xlim([0, 1000])
-    axes[1, 1].set_ylim([-3, 3])
+    axes[1, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[1, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), ca_all2[0:int(start / 2) + 2], color='b')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), ca_all2[int(start / 2) + 2:int(end / 2)], color='c')
@@ -444,12 +436,12 @@ def permutation_visualization(signal1, signal2, n_segments=8, seg_index=2):
     axes[2, 0].plot(range(start, end), new_signal[start:end], color='c')
     axes[2, 0].plot(range(end, len(new_signal)), new_signal[end:], color='k')
     # axes[2, 0].set_xlim([0, 1000])
-    # axes[2, 0].set_ylim([-0.2, 0.2])
+    axes[2, 0].set_ylim([-0.2, 0.2])
     axes[2, 1].set_title("WT: Permutation")
     for i in segments:
         axes[2, 1].axvline(x=i, color='r', linestyle='--')
     # axes[2, 1].set_xlim([0, 1000])
-    axes[2, 1].set_ylim([-3, 3])
+    axes[2, 1].set_ylim([-0.2, 0.2])
     ax2 = axes[2, 1].twiny()
     ax2.plot(range(0, int(start / 2) + 2), new_ca_all[0:int(start / 2) + 2], color='k')
     ax2.plot(range(int(start / 2) + 2, int(end / 2)), new_ca_all[int(start / 2) + 2:int(end / 2)], color='c')
