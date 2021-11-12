@@ -9,7 +9,7 @@ from sklearn.preprocessing import normalize, scale
 from scipy.io import loadmat
 import pywt
 from utilities.FBCSP_V4 import *
-
+import mne
 
 def bandpassfilter(sig, lowcut, highcut, fs, order=5):
     # Pass band filtering for a digital signal
@@ -20,7 +20,7 @@ def bandpassfilter(sig, lowcut, highcut, fs, order=5):
     return np.array(y)
 
 
-def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True):
+def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, consider_artefacts=True, channel_elaboration='car'):
     """
     Function for the loading of the dataset corresponding to a subject (and saved according to dataloading.m)
 
@@ -80,7 +80,36 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
     data = data.T
 
     for j in range(trials.shape[0]):
-        trials[j, :, :] = normalize(data[:, event_start[j] + windows_sample], axis=1)
+        d = data[:, event_start[j] + windows_sample]
+
+        if channel_elaboration == 'car':
+            # CAR
+            info = mne.create_info(22, 250, ch_types='eeg')
+            raw = mne.io.RawArray(d, info)
+            d_elab = mne.set_eeg_reference(raw, 'average', verbose=50)[0].get_data(None)
+            d_elab = np.array(d_elab)
+
+        elif channel_elaboration == 'laplacian':
+            # LAPLACIAN
+            near_channels = {1: [4], 2: [3, 8], 3: [2, 4, 9], 4: [3, 5, 10], 5: [4, 6, 11], 6: [5, 12],
+                             7: [8], 8: [2, 7, 9, 14], 9: [3, 8, 10, 15], 10: [4, 9, 11, 16], 11: [5, 10, 12, 17],
+                             12: [6, 11, 13, 18], 13: [12], 14: [8, 15], 15: [9, 14, 16, 19], 16:  [10, 15, 17, 20],
+                             17: [11, 16, 18, 21], 18: [12, 17], 19: [15, 20], 20: [16, 19, 21, 22],
+                             21: [17, 20], 22: [20]}
+            d_elab = []
+            for channel in near_channels.keys():
+                near_channel = near_channels[channel]
+                y = 0
+                for n in near_channel:
+                    y += d[n-1]
+                x = d[channel-1] - y/len(near_channel)
+                d_elab.append(x)
+            d_elab = np.array(d_elab)
+
+        else:
+            d_elab = d
+
+        trials[j, :, :] = normalize(d_elab, axis=1)
 
     # Creation of the label list
 

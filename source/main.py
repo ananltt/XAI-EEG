@@ -14,6 +14,7 @@ if __name__ == "__main__":
     iterations = 1000       # number of iterations of the training for the variability analysis
     eegnet = True           # if perform eegnet training or cnn training
     wavelet = True          # if use the wavelet transform or not
+    channel_elaboration = 'laplacian'
 
     necessary_redimension = True
     fs = 250                # sampling frequency
@@ -40,10 +41,10 @@ if __name__ == "__main__":
     for subject in subjects:
 
         if dataset is None:
-            dataset, labels = load_dataset(data_folder, subject, consider_artefacts=False)
+            dataset, labels = load_dataset(data_folder, subject, consider_artefacts=False, channel_elaboration=channel_elaboration)
 
         else:
-            d, l = load_dataset(data_folder, subject, consider_artefacts=False)
+            d, l = load_dataset(data_folder, subject, consider_artefacts=False, channel_elaboration=channel_elaboration)
             dataset = np.concatenate((dataset, np.array(d)), axis=0)  # complete dataset
             labels = np.concatenate((labels, np.array(l)), axis=0)
 
