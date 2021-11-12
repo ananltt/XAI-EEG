@@ -1,0 +1,10 @@
+2021-10-21 18:18:57.762888: E tensorflow/stream_executor/cuda/cuda_driver.cc:271] failed call to cuInit: CUDA_ERROR_UNKNOWN: unknown error
+2021-10-21 18:18:57.762930: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:169] retrieving CUDA diagnostic information for host: gpu2.dei.unipd.it
+2021-10-21 18:18:57.762935: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:176] hostname: gpu2.dei.unipd.it
+2021-10-21 18:18:57.763028: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:200] libcuda reported version is: Invalid argument: expected %d.%d, %d.%d.%d, or %d.%d.%d.%d form for driver version; got "1"
+2021-10-21 18:18:57.763047: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:204] kernel reported version is: 465.19.1
+2021-10-21 18:18:57.763306: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 AVX512F FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2021-10-21 18:18:58.044179: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:185] None of the MLIR Optimization Passes are enabled (registered 2)
+slurmstepd: error: slurm_get_node_energy: Connection refused
+slurmstepd: error: _get_joules_task: can't get info from slurmd

@@ -8,13 +8,15 @@ import numpy as np
 if __name__ == "__main__":
 
     data_folder = '../dataset/EEG'
-    output_folder = '../output/variability - 1000 iterations - signal CNN'
+    output_folder = '../output/variability - 4 segments - 1000 iterations - Laplacian'
 
     n_segments = 4          # number of segments considered in the signal
     iterations = 1000       # number of iterations of the training for the variability analysis
     eegnet = True           # if perform eegnet training or cnn training
     wavelet = True          # if use the wavelet transform or not
     channel_elaboration = 'laplacian'
+    
+    print(output_folder)
 
     necessary_redimension = True
     fs = 250                # sampling frequency

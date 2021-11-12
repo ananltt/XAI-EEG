@@ -1,32 +1,28 @@
 #!/bin/bash
 
-#SBATCH --job-name xai
-#SBATCH --output output_%j.txt
-#SBATCH --error errors_%j.txt
+#SBATCH -J xai
+#SBATCH -o %j_output.txt
+#SBATCH -e %j_errors.txt
 
 #SBATCH --mail-type ALL
 #SBATCH --mail-user giulia.pezzutti@studenti.unipd.it
-
-# #SBATCH --gres=gpu:1
 
 #SBATCH -n 1
 #SBATCH -c 8
 #SBATCH -p allgroups
 #SBATCH -t 10-00:00:00
-#SBATCH --mem 20G
+#SBATCH --mem 80G
+
+#SBATCH --gres=gpu:rtx
 
 # setup my personal/shared project folder
-MY_DIR=/home/pezzuttigi/XAI-EEG/source/
+DIRECTORY=/home/pezzuttigi/XAI-EEG/source/
+DATA=/home/pezzuttigi/XAI-EEG/dataset/EEG/
 
-# make my folder the current directory
-cd $MY_DIR
+# make my folder current directory
+cd $DIRECTORY
 
-# setup python3 environment for machine learning computations 
-source /nfsd/opt/anaconda3/anaconda3.sh
-conda activate /nfsd/signet/hda_env_gpu
-
-# run code
-srun python $MY_DIR/main.py
-
-# deactivate environment at the end of the job
-conda deactivate
+srun singularity exec --nv \
+                 --bind $DATA --bind $DIRECTORY \
+                 /nfsd/opt/sif-images/tensorflow_latest-gpu.sif \
+                 python $DIRECTORY/main.py 
