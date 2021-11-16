@@ -84,10 +84,13 @@ def load_dataset(data_dir, subject, fs=250, start_second=2, signal_length=4, con
 
         if channel_elaboration == 'car':
             # CAR
-            info = mne.create_info(22, 250, ch_types='eeg')
-            raw = mne.io.RawArray(d, info)
-            d_elab = mne.set_eeg_reference(raw, 'average', verbose=50)[0].get_data(None)
-            d_elab = np.array(d_elab)
+            # info = mne.create_info(22, 250, ch_types='eeg')
+            # raw = mne.io.RawArray(d, info)
+            # d_elab = mne.set_eeg_reference(raw, 'average', verbose=50)[0].get_data(None)
+            # d_elab = np.array(d_elab)
+
+            mean = np.mean(d, axis=0)
+            d_elab = d - mean
 
         elif channel_elaboration == 'laplacian':
             # LAPLACIAN

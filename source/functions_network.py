@@ -80,15 +80,6 @@ def training_CNN(train_data, train_labels, scale, batch_size, num_epochs, model_
     # plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
 
-    model = DNN_model_2labels(model)
-    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-
-    history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
-                        batch_size=batch_size, epochs=num_epochs, verbose=2)
-
-    # plot_model_training(history, model_path)
-    model.save('{}_DNN.h5'.format(model_path))
-
     return model
 
 
@@ -121,15 +112,6 @@ def training_EEGNet(train_data, train_labels, batch_size, num_epochs, model_path
 
     plot_model_training(history, model_path)
     model.save('{}.h5'.format(model_path))
-
-    model = DNN_model_2labels(model, 2)
-    model.compile(loss='categorical_crossentropy', optimizer="adam", metrics=['accuracy'])
-
-    history = model.fit(x=train_data[:], y=train_labels[:], validation_data=(val_data, val_labels),
-                        batch_size=batch_size, epochs=num_epochs, verbose=2)
-
-    # plot_model_training(history, model_path)
-    model.save('{}_DNN.h5'.format(model_path))
 
     return model
 

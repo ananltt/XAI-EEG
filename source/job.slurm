@@ -18,11 +18,12 @@
 # setup my personal/shared project folder
 DIRECTORY=/home/pezzuttigi/XAI-EEG/source/
 DATA=/home/pezzuttigi/XAI-EEG/dataset/EEG/
+OUTPUT=/home/pezzuttigi/XAI-EEG/output/
 
 # make my folder current directory
 cd $DIRECTORY
 
 srun singularity exec --nv \
-                 --bind $DATA --bind $DIRECTORY \
+                 --bind $DATA --bind $DIRECTORY --bind $OUTPUT\
                  /nfsd/opt/sif-images/tensorflow_latest-gpu.sif \
                  python $DIRECTORY/main.py 
